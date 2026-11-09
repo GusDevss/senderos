@@ -1,0 +1,313 @@
+/* Los Senderos Residencial — interacciones del sitio */
+(function () {
+  'use strict';
+
+  document.documentElement.classList.add('js');
+
+  var WHATSAPP = '5214428230513';
+  var PROMO_DELAY_MS = 3000;          // el popup de promociones aparece a los 3 segundos
+  var PROMO_SESSION_KEY = 'ls-promos-visto';
+  var GTM_ID = 'GTM-PTMTM2C9';
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var conn = navigator.connection || {};
+  var saveData = conn.saveData || /(^|-)2g$/.test(conn.effectiveType || '');
+
+  function $(sel, ctx) { return (ctx || document).querySelector(sel); }
+  function $$(sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); }
+
+  function track(event, data) {
+    window.dataLayer = window.dataLayer || [];
+    var payload = { event: event };
+    if (data) for (var k in data) payload[k] = data[k];
+    window.dataLayer.push(payload);
+  }
+
+  function storage(fn) { try { return fn(window.sessionStorage); } catch (e) { return null; } }
+
+  /* ---------- Año del pie ---------- */
+  $$('[data-year]').forEach(function (el) { el.textContent = new Date().getFullYear(); });
+
+  /* ---------- Encabezado sólido al hacer scroll ---------- */
+  var header = $('[data-header]');
+  if (header && !document.body.classList.contains('page-legal')) {
+    var onScroll = function () { header.classList.toggle('is-solid', window.scrollY > 40); };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  /* ---------- Menú móvil ---------- */
+  var toggle = $('[data-menu-toggle]');
+  if (toggle) {
+    var setMenu = function (open) {
+      document.body.classList.toggle('menu-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      $('.sr-only', toggle).textContent = open ? 'Cerrar menú' : 'Abrir menú';
+    };
+    toggle.addEventListener('click', function () { setMenu(toggle.getAttribute('aria-expanded') !== 'true'); });
+    $$('[data-nav] a').forEach(function (a) { a.addEventListener('click', function () { setMenu(false); }); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setMenu(false); });
+  }
+
+  /* ---------- Video de portada ----------
+     Se carga después del póster (no bloquea la primera carga), en versión
+     ligera para celulares, y no se carga con ahorro de datos o movimiento reducido. */
+  var heroVideo = $('[data-hero-video]');
+  if (heroVideo && !reduceMotion && !saveData) {
+    var startHero = function () {
+      var small = window.matchMedia('(max-width: 767px)').matches;
+      heroVideo.src = small ? heroVideo.dataset.srcSm : heroVideo.dataset.srcLg;
+      heroVideo.addEventListener('playing', function () { heroVideo.classList.add('is-playing'); }, { once: true });
+      var p = heroVideo.play();
+      if (p && p.catch) p.catch(function () {});
+    };
+    if (document.readyState === 'complete') startHero();
+    else window.addEventListener('load', startHero, { once: true });
+
+    // Pausar cuando la portada no está visible (ahorra batería y CPU)
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (!heroVideo.src) return;
+          if (en.isIntersecting) { var p = heroVideo.play(); if (p && p.catch) p.catch(function () {}); }
+          else heroVideo.pause();
+        });
+      }, { threshold: 0.05 }).observe(heroVideo);
+    }
+  }
+
+  /* ---------- Videos cortos diferidos (fragmentos del drone) ---------- */
+  var lazyVideos = $$('video.lazy-video');
+  if ('IntersectionObserver' in window && !reduceMotion && !saveData) {
+    var vio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        var v = en.target;
+        if (en.isIntersecting) {
+          if (!v.src) v.src = v.dataset.src;
+          var p = v.play(); if (p && p.catch) p.catch(function () {});
+        } else if (v.src) {
+          v.pause();
+        }
+      });
+    }, { rootMargin: '200px 0px', threshold: 0.2 });
+    lazyVideos.forEach(function (v) { vio.observe(v); });
+  }
+
+  /* ---------- Animaciones de aparición ---------- */
+  var reveals = $$('.reveal');
+  if ('IntersectionObserver' in window && !reduceMotion) {
+    var rio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('is-visible'); rio.unobserve(en.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.1 });
+    reveals.forEach(function (el) { rio.observe(el); });
+  } else {
+    reveals.forEach(function (el) { el.classList.add('is-visible'); });
+  }
+
+  /* ---------- Utilidades para <dialog> ---------- */
+  function openDialog(d) {
+    if (!d || d.open) return;
+    if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', '');
+    document.body.classList.add('dialog-open');
+  }
+  function closeDialog(d) {
+    if (!d) return;
+    if (typeof d.close === 'function') d.close(); else d.removeAttribute('open');
+  }
+  $$('dialog').forEach(function (d) {
+    d.addEventListener('close', function () {
+      if (!$('dialog[open]')) document.body.classList.remove('dialog-open');
+    });
+    // Cerrar al hacer clic fuera del contenido
+    d.addEventListener('click', function (e) { if (e.target === d) closeDialog(d); });
+    $$('[data-close]', d).forEach(function (b) { b.addEventListener('click', function () { closeDialog(d); }); });
+  });
+
+  /* ---------- Popup de promociones ---------- */
+  var promos = $('[data-promos]');
+  if (promos) {
+    var track_ = $('[data-promo-track]', promos);
+    var slides = $$('.promo', track_);
+    var dotsWrap = $('[data-promo-dots]', promos);
+    var current = 0;
+
+    slides.forEach(function (_, i) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('aria-label', 'Ver promoción ' + (i + 1) + ' de ' + slides.length);
+      b.addEventListener('click', function () { goTo(i); });
+      dotsWrap.appendChild(b);
+    });
+    var dots = $$('button', dotsWrap);
+
+    function setCurrent(i) {
+      current = i;
+      dots.forEach(function (d, j) { d.setAttribute('aria-current', j === i ? 'true' : 'false'); });
+    }
+    function goTo(i) {
+      i = (i + slides.length) % slides.length;
+      track_.scrollTo({ left: slides[i].offsetLeft - track_.offsetLeft, behavior: reduceMotion ? 'auto' : 'smooth' });
+      setCurrent(i);
+    }
+    setCurrent(0);
+    $('[data-promo-prev]', promos).addEventListener('click', function () { goTo(current - 1); });
+    $('[data-promo-next]', promos).addEventListener('click', function () { goTo(current + 1); });
+    track_.addEventListener('scroll', function () {
+      var i = Math.round(track_.scrollLeft / track_.clientWidth);
+      if (i !== current && slides[i]) setCurrent(i);
+    }, { passive: true });
+
+    // Rotación automática mientras el popup está abierto (se detiene al interactuar)
+    var auto = null;
+    function stopAuto() { if (auto) { clearInterval(auto); auto = null; } }
+    function startAuto() {
+      stopAuto();
+      if (reduceMotion || slides.length < 2) return;
+      auto = setInterval(function () { goTo(current + 1); }, 5000);
+    }
+    ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (ev) {
+      promos.addEventListener(ev, stopAuto, { passive: true });
+    });
+    promos.addEventListener('close', stopAuto);
+
+    function showPromos(source) {
+      if (promos.open) return;
+      openDialog(promos);
+      track_.scrollLeft = 0; setCurrent(0);
+      startAuto();
+      storage(function (s) { s.setItem(PROMO_SESSION_KEY, '1'); });
+      track('promociones_abiertas', { origen: source });
+    }
+
+    $$('[data-open-promos]').forEach(function (b) {
+      b.addEventListener('click', function () { showPromos('boton'); });
+    });
+
+    // Apertura automática a los 3 segundos (una vez por sesión de navegación)
+    var alreadySeen = storage(function (s) { return s.getItem(PROMO_SESSION_KEY); });
+    if (!alreadySeen) {
+      setTimeout(function () {
+        if ($('dialog[open]') || document.body.classList.contains('menu-open')) return;
+        showPromos('automatico');
+      }, PROMO_DELAY_MS);
+    }
+  }
+
+  /* ---------- Visor de imágenes ---------- */
+  var lb = $('[data-lightbox-dialog]');
+  if (lb) {
+    var lbImg = $('[data-lightbox-img]', lb);
+    $$('[data-lightbox]').forEach(function (el) {
+      el.addEventListener('click', function (e) {
+        e.preventDefault();
+        var img = $('img', el);
+        lbImg.src = el.getAttribute('data-lightbox');
+        lbImg.alt = img ? img.alt : '';
+        openDialog(lb);
+      });
+    });
+    lb.addEventListener('close', function () { lbImg.removeAttribute('src'); });
+  }
+
+  /* ---------- Carrusel de la galería ---------- */
+  $$('[data-scroll-prev], [data-scroll-next]').forEach(function (btn) {
+    var target = document.getElementById(btn.getAttribute('data-scroll-prev') || btn.getAttribute('data-scroll-next'));
+    if (!target) return;
+    var dir = btn.hasAttribute('data-scroll-next') ? 1 : -1;
+    btn.addEventListener('click', function () {
+      var item = target.querySelector('li');
+      var step = item ? item.getBoundingClientRect().width + 18 : 300;
+      target.scrollBy({ left: dir * step, behavior: reduceMotion ? 'auto' : 'smooth' });
+    });
+  });
+
+  /* ---------- YouTube ligero (carga el reproductor sólo al dar clic) ---------- */
+  $$('[data-youtube]').forEach(function (box) {
+    $('button', box).addEventListener('click', function () {
+      var id = box.getAttribute('data-youtube');
+      var iframe = document.createElement('iframe');
+      iframe.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0';
+      iframe.title = 'Recorrido virtual Los Senderos Residencial';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.allowFullscreen = true;
+      box.innerHTML = '';
+      box.appendChild(iframe);
+      track('video_recorrido');
+    });
+  });
+
+  /* ---------- Mapa de Google (carga al dar clic) ---------- */
+  var mapBtn = $('[data-map-load]');
+  if (mapBtn) {
+    mapBtn.addEventListener('click', function () {
+      var iframe = document.createElement('iframe');
+      iframe.src = 'https://www.google.com/maps?q=' + encodeURIComponent('Los Senderos Residencial, Av. Tlacote, Santiago de Querétaro, Qro.') + '&output=embed';
+      iframe.title = 'Ubicación de Los Senderos Residencial en Google Maps';
+      iframe.loading = 'lazy';
+      iframe.referrerPolicy = 'no-referrer-when-downgrade';
+      var wrap = mapBtn.parentNode;
+      wrap.innerHTML = '';
+      wrap.appendChild(iframe);
+    });
+  }
+
+  /* ---------- Formulario de contacto → WhatsApp ---------- */
+  var form = $('[data-contact-form]');
+  if (form) {
+    var status = $('[data-form-status]', form);
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var ok = true;
+      $$('input, select, textarea', form).forEach(function (f) {
+        var wrap = f.closest('.field');
+        var valid = f.checkValidity();
+        if (wrap) wrap.classList.toggle('is-invalid', !valid);
+        if (!valid && ok) { ok = false; f.focus(); }
+      });
+      if (!ok) { status.textContent = 'Revisa los campos marcados y acepta el aviso de privacidad.'; return; }
+
+      var d = new FormData(form);
+      var lines = [
+        'Hola, me gustaría recibir información sobre Los Senderos Residencial.',
+        '',
+        'Nombre: ' + d.get('nombre'),
+        'Teléfono: ' + d.get('telefono'),
+        'Correo: ' + d.get('correo')
+      ];
+      if (d.get('privada')) lines.push('Privada de interés: ' + d.get('privada'));
+      if (d.get('mensaje')) lines.push('Mensaje: ' + d.get('mensaje'));
+
+      track('formulario_contacto', { privada: d.get('privada') || 'sin definir' });
+      status.textContent = '¡Gracias! Abriendo WhatsApp para enviar tu mensaje…';
+      window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(lines.join('\n')), '_blank', 'noopener');
+      form.reset();
+    });
+  }
+
+  /* ---------- Medición de clics en WhatsApp / llamadas ---------- */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[data-track], a[href^="tel:"]');
+    if (!a) return;
+    track(a.getAttribute('data-track') ? 'clic_whatsapp' : 'clic_telefono', { ubicacion: a.getAttribute('data-track') || 'telefono' });
+  });
+
+  /* ---------- Google Tag Manager (diferido para no frenar la carga) ---------- */
+  function loadGTM() {
+    if (window.__gtmLoaded) return;
+    window.__gtmLoaded = true;
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtm.js?id=' + GTM_ID;
+    document.head.appendChild(s);
+  }
+  if (GTM_ID) {
+    var gtmTimer = setTimeout(loadGTM, 3500);
+    ['pointerdown', 'scroll', 'keydown', 'touchstart'].forEach(function (ev) {
+      window.addEventListener(ev, function () { clearTimeout(gtmTimer); loadGTM(); }, { once: true, passive: true });
+    });
+  }
+})();

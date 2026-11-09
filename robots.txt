@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://lossenderosresidencial.com.mx/sitemap.xml

@@ -1,0 +1,42 @@
+# Configuración para hosting Apache (cPanel / el mismo servidor del WordPress actual).
+# Si el sitio se publica en Netlify, Vercel u otro, traducir estas reglas a su formato.
+
+Options -Indexes
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Forzar HTTPS y dominio sin www
+  RewriteCond %{HTTPS} off [OR]
+  RewriteCond %{HTTP_HOST} ^www\. [NC]
+  RewriteRule ^ https://lossenderosresidencial.com.mx%{REQUEST_URI} [L,R=301]
+
+  # Redirecciones 301 desde las URLs del WordPress anterior
+  RewriteRule ^privacy-policy/?$ /aviso-de-privacidad.html [L,R=301]
+  RewriteRule ^aviso-de-privacidad/?$ /aviso-de-privacidad.html [L,R=301]
+  RewriteRule ^feed/?$ / [L,R=301]
+  RewriteRule ^comments/feed/?$ / [L,R=301]
+</IfModule>
+
+# Compresión
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml application/xml text/xml application/manifest+json
+</IfModule>
+
+# Caché del navegador
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+  ExpiresByType image/webp "access plus 6 months"
+  ExpiresByType image/png "access plus 6 months"
+  ExpiresByType image/jpeg "access plus 6 months"
+  ExpiresByType image/x-icon "access plus 1 year"
+  ExpiresByType video/mp4 "access plus 6 months"
+</IfModule>
+
+AddType image/webp .webp
+AddType video/mp4 .mp4
+AddType application/manifest+json .webmanifest
