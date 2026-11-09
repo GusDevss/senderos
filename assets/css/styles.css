@@ -939,3 +939,18 @@ body.dialog-open { overflow: hidden; }
 
 /* Modelos: título y etiqueta apilados */
 .model-body { flex-direction: column; align-items: flex-start; gap: 6px; padding: 12px 8px 6px; }
+
+/* ---------- Portada: el texto manda, el video queda de fondo ---------- */
+.hero-poster, .hero-video { filter: saturate(.55) brightness(.8) contrast(.95) blur(1.5px); transform: scale(1.03); }
+.hero-media { background: var(--green-900); }
+.hero-media::after {
+  background:
+    linear-gradient(90deg, rgb(12 26 6 / .9) 0%, rgb(12 26 6 / .78) 40%, rgb(12 26 6 / .5) 72%, rgb(12 26 6 / .4) 100%),
+    linear-gradient(180deg, rgb(12 26 6 / .55) 0%, transparent 25%, transparent 70%, rgb(12 26 6 / .7) 100%);
+}
+.hero h1 { text-shadow: 0 4px 40px rgb(0 0 0 / .35); }
+.hero .eyebrow--light { color: var(--gold-400); }
+.hero-highlights .check { box-shadow: 0 0 0 4px rgb(177 173 97 / .18); }
+@media (max-width: 767px) {
+  .hero-media::after { background: linear-gradient(180deg, rgb(12 26 6 / .78) 0%, rgb(12 26 6 / .72) 50%, rgb(12 26 6 / .88) 100%); }
+}
