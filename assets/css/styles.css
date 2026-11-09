@@ -604,3 +604,8 @@ body.dialog-open { overflow: hidden; }
   .promo img { max-width: min(100%, 33vh); max-width: min(100%, 33dvh); }
   .promo-nav { margin-top: 6px; }
 }
+
+/* Campo trampa anti-spam del formulario (invisible para personas) */
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.contact-form { position: relative; }
+.contact-form button[disabled] { opacity: .7; cursor: progress; transform: none; }

@@ -161,7 +161,6 @@
           <li><a href="#amenidades">Amenidades</a></li>
           <li><a href="#privadas">Privadas</a></li>
           <li><a href="#recorrido-virtual">Recorrido virtual</a></li>
-          <li><a href="https://lossenderosresidencial.com.mx/blog-de-terrenos-los-senderos/">Blog</a></li>
           <li><a href="#contacto">Contacto</a></li>
         </ul>
         <a class="btn btn--gold btn--sm nav-cta" href="tel:+524424545511">
@@ -452,7 +451,9 @@
         <div class="contact-form-card reveal">
           <p class="eyebrow eyebrow--light">Tu nuevo terreno te espera</p>
           <h2 id="contacto-title">¡Solicita información ahora!</h2>
-          <form class="contact-form" data-contact-form novalidate>
+          <form class="contact-form" action="enviar.php" method="post" data-contact-form novalidate>
+            <div class="hp" aria-hidden="true"><label for="f-sitio">No llenar este campo</label><input id="f-sitio" name="sitio_web" type="text" tabindex="-1" autocomplete="off"></div>
+            <input type="hidden" name="t" value="" data-form-time>
             <div class="field">
               <label for="f-nombre">Nombre</label>
               <input id="f-nombre" name="nombre" type="text" autocomplete="name" required>
@@ -481,10 +482,10 @@
               <textarea id="f-mensaje" name="mensaje" rows="3"></textarea>
             </div>
             <label class="consent">
-              <input type="checkbox" name="acepto" required>
+              <input type="checkbox" name="acepto" value="1" required>
               <span>Acepto el <a href="aviso-de-privacidad.html">aviso de privacidad</a>.</span>
             </label>
-            <button class="btn btn--gold btn--block" type="submit">Enviar por WhatsApp</button>
+            <button class="btn btn--gold btn--block" type="submit" data-form-submit>Enviar solicitud</button>
             <p class="form-status" role="status" aria-live="polite" data-form-status></p>
           </form>
         </div>
@@ -582,7 +583,6 @@
           <li><a href="#amenidades">Amenidades</a></li>
           <li><a href="#privadas">Privadas</a></li>
           <li><a href="#recorrido-virtual">Recorrido virtual</a></li>
-          <li><a href="https://lossenderosresidencial.com.mx/blog-de-terrenos-los-senderos/">Blog</a></li>
           <li><a href="aviso-de-privacidad.html">Aviso de privacidad</a></li>
         </ul>
         <div class="social">
@@ -607,7 +607,7 @@
   </a>
 
   <!-- ============ POPUP DE PROMOCIONES ============
-       Se abre automáticamente a los 3 segundos (una vez por sesión)
+       Se abre automáticamente a los 8 segundos (una vez por sesión)
        y cada vez que se pulsa un botón con [data-open-promos].
        Para cambiar las promociones, edita los <li class="promo">. -->
   <dialog class="promo-dialog" id="promociones" aria-labelledby="promos-title" data-promos>

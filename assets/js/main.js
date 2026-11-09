@@ -5,7 +5,7 @@
   document.documentElement.classList.add('js');
 
   var WHATSAPP = '5214428230513';
-  var PROMO_DELAY_MS = 3000;          // el popup de promociones aparece a los 3 segundos
+  var PROMO_DELAY_MS = 8000;          // el popup aparece a los 8 s (o antes si el visitante baja de la portada)
   var PROMO_SESSION_KEY = 'ls-promos-visto';
   var GTM_ID = 'GTM-PTMTM2C9';
 
@@ -185,13 +185,25 @@
       b.addEventListener('click', function () { showPromos('boton'); });
     });
 
-    // Apertura automática a los 3 segundos (una vez por sesión de navegación)
+    // Apertura automática (una vez por sesión de navegación)
     var alreadySeen = storage(function (s) { return s.getItem(PROMO_SESSION_KEY); });
     if (!alreadySeen) {
-      setTimeout(function () {
+      var autoTimer = null;
+      var minDelayReached = false;
+      var onScrollPromo = function () {
+        if (minDelayReached && window.scrollY > window.innerHeight * 0.9) autoOpen('scroll');
+      };
+      var autoOpen = function (source) {
+        clearTimeout(autoTimer);
+        window.removeEventListener('scroll', onScrollPromo);
         if ($('dialog[open]') || document.body.classList.contains('menu-open')) return;
-        showPromos('automatico');
-      }, PROMO_DELAY_MS);
+        showPromos(source);
+      };
+      autoTimer = setTimeout(function () { autoOpen('automatico'); }, PROMO_DELAY_MS);
+      // Si el visitante baja más allá de la portada (muestra interés) se abre antes,
+      // pero nunca en los primeros 3 segundos.
+      setTimeout(function () { minDelayReached = true; onScrollPromo(); }, 3000);
+      window.addEventListener('scroll', onScrollPromo, { passive: true });
     }
   }
 
@@ -253,22 +265,20 @@
     });
   }
 
-  /* ---------- Formulario de contacto → WhatsApp ---------- */
+  /* ---------- Formulario de contacto → correo (enviar.php) ---------- */
   var form = $('[data-contact-form]');
   if (form) {
     var status = $('[data-form-status]', form);
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var ok = true;
-      $$('input, select, textarea', form).forEach(function (f) {
-        var wrap = f.closest('.field');
-        var valid = f.checkValidity();
-        if (wrap) wrap.classList.toggle('is-invalid', !valid);
-        if (!valid && ok) { ok = false; f.focus(); }
-      });
-      if (!ok) { status.textContent = 'Revisa los campos marcados y acepta el aviso de privacidad.'; return; }
+    var submitBtn = $('[data-form-submit]', form);
+    var timeField = $('[data-form-time]', form);
+    if (timeField) timeField.value = String(Date.now());
 
-      var d = new FormData(form);
+    // Resultado cuando el formulario se envió sin JavaScript
+    var enviado = new URLSearchParams(location.search).get('enviado');
+    if (enviado === '1') status.textContent = '¡Gracias! Recibimos tu solicitud y te contactaremos muy pronto.';
+    else if (enviado === '0') status.textContent = 'No pudimos enviar tu mensaje. Escríbenos por WhatsApp, por favor.';
+
+    var whatsappFallback = function (d) {
       var lines = [
         'Hola, me gustaría recibir información sobre Los Senderos Residencial.',
         '',
@@ -278,11 +288,55 @@
       ];
       if (d.get('privada')) lines.push('Privada de interés: ' + d.get('privada'));
       if (d.get('mensaje')) lines.push('Mensaje: ' + d.get('mensaje'));
+      return 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(lines.join('\n'));
+    };
 
-      track('formulario_contacto', { privada: d.get('privada') || 'sin definir' });
-      status.textContent = '¡Gracias! Abriendo WhatsApp para enviar tu mensaje…';
-      window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(lines.join('\n')), '_blank', 'noopener');
-      form.reset();
+    var showStatus = function (text, link) {
+      status.textContent = text;
+      if (link) {
+        var a = document.createElement('a');
+        a.href = link; a.target = '_blank'; a.rel = 'noopener';
+        a.textContent = ' Enviar por WhatsApp →';
+        a.style.color = 'inherit'; a.style.fontWeight = '600';
+        status.appendChild(a);
+      }
+    };
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var ok = true;
+      $$('input:not([type="hidden"]):not([name="sitio_web"]), select, textarea', form).forEach(function (f) {
+        var wrap = f.closest('.field');
+        var valid = f.checkValidity();
+        if (wrap) wrap.classList.toggle('is-invalid', !valid);
+        if (!valid && ok) { ok = false; f.focus(); }
+      });
+      if (!ok) { showStatus('Revisa los campos marcados y acepta el aviso de privacidad.'); return; }
+
+      var d = new FormData(form);
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Enviando…';
+      status.textContent = '';
+
+      fetch(form.action, { method: 'POST', body: d, headers: { Accept: 'application/json' } })
+        .then(function (r) { return r.json().catch(function () { return { ok: false }; }); })
+        .then(function (res) {
+          if (res && res.ok) {
+            track('formulario_contacto', { privada: d.get('privada') || 'sin definir' });
+            showStatus(res.mensaje || '¡Gracias! Te contactaremos muy pronto.');
+            form.reset();
+            if (timeField) timeField.value = String(Date.now());
+          } else {
+            showStatus((res && res.mensaje) || 'No pudimos enviar tu mensaje.', whatsappFallback(d));
+          }
+        })
+        .catch(function () {
+          showStatus('No pudimos enviar tu mensaje.', whatsappFallback(d));
+        })
+        .then(function () {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Enviar solicitud';
+        });
     });
   }
 

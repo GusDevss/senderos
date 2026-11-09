@@ -1,8 +1,14 @@
-# Configuración para hosting Apache (cPanel / el mismo servidor del WordPress actual).
-# Si el sitio se publica en Netlify, Vercel u otro, traducir estas reglas a su formato.
+# Configuración para Hostinger (servidor LiteSpeed, compatible con .htaccess de Apache).
 
 Options -Indexes
 DirectoryIndex index.html
+ErrorDocument 404 /404.html
+ErrorDocument 410 /404.html
+
+# No permitir ver archivos ocultos ni de configuración
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
@@ -17,6 +23,14 @@ DirectoryIndex index.html
   RewriteRule ^aviso-de-privacidad/?$ /aviso-de-privacidad.html [L,R=301]
   RewriteRule ^feed/?$ / [L,R=301]
   RewriteRule ^comments/feed/?$ / [L,R=301]
+
+  # El blog se eliminó: su portada, categorías, etiquetas y autores van al inicio
+  RewriteRule ^blog-de-terrenos-los-senderos(/.*)?$ / [L,R=301]
+  RewriteRule ^(category|tag|author)(/.*)?$ / [L,R=301]
+
+  # Rutas internas de WordPress que ya no existen: 410 (eliminado) para que Google las quite rápido
+  RewriteRule ^(wp-admin|wp-includes|wp-json|wp-content)(/.*)?$ - [G,L]
+  RewriteRule ^(wp-login\.php|xmlrpc\.php|wp-cron\.php)$ - [G,L]
 </IfModule>
 
 # Compresión
