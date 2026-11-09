@@ -954,3 +954,142 @@ body.dialog-open { overflow: hidden; }
 @media (max-width: 767px) {
   .hero-media::after { background: linear-gradient(180deg, rgb(12 26 6 / .78) 0%, rgb(12 26 6 / .72) 50%, rgb(12 26 6 / .88) 100%); }
 }
+
+/* =====================================================================
+   v5 — Portada moderna (arco con video) y promociones Buen Fin
+   ===================================================================== */
+.hero--v2 {
+  min-height: auto; display: block; overflow: hidden; isolation: isolate;
+  padding: calc(var(--header-h) + clamp(28px, 5vw, 64px)) 0 0;
+  background:
+    radial-gradient(ellipse 60% 70% at 85% 30%, rgb(177 173 97 / .22), transparent 60%),
+    radial-gradient(ellipse 50% 60% at 0% 100%, rgb(77 122 53 / .45), transparent 60%),
+    linear-gradient(160deg, #1f3614 0%, #2a4a1c 55%, #1a2f10 100%);
+}
+.hero--v2 .hero-bg { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.hero-ondas { position: absolute; left: -160px; top: 60px; width: 560px; opacity: .08; filter: brightness(3); }
+.hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(28px, 5vw, 72px); align-items: center; }
+.hero--v2 .hero-content { max-width: 640px; }
+
+.hero-announce {
+  display: inline-flex; align-items: center; gap: 10px; margin-bottom: 22px;
+  padding: 6px 14px 6px 6px; border-radius: 999px; border: 1px solid rgb(255 255 255 / .2);
+  background: rgb(255 255 255 / .08); color: #fff; font-size: .85rem; font-weight: 500; text-align: left;
+  backdrop-filter: blur(8px); transition: background .25s, border-color .25s;
+}
+.hero-announce:hover { background: rgb(255 255 255 / .14); border-color: var(--gold-300); }
+.hero-announce-tag { background: #d7262f; color: #fff; font-weight: 700; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; padding: .4em .8em; border-radius: 999px; }
+.hero-announce svg { transition: transform .25s var(--ease); }
+.hero-announce:hover svg { transform: translateX(3px); }
+
+.hero--v2 h1 {
+  font-size: clamp(2.9rem, 6.4vw, 5.6rem); line-height: .95; max-width: 10ch; text-shadow: none; margin-bottom: .35em;
+}
+.hero--v2 h1 em {
+  font-style: italic; color: var(--gold-400); position: relative; white-space: nowrap;
+}
+.hero--v2 h1 em::after {
+  content: ""; position: absolute; left: 2%; right: 4%; bottom: .02em; height: .09em; border-radius: 99px;
+  background: linear-gradient(90deg, var(--gold-500), transparent); opacity: .7;
+}
+.hero--v2 .hero-lead { max-width: 46ch; font-size: clamp(1rem, 1.4vw, 1.15rem); color: rgb(255 255 255 / .82); text-shadow: none; }
+
+.hero-chips { list-style: none; padding: 0; margin: 26px 0 30px; display: flex; flex-wrap: wrap; gap: 10px; }
+.hero-chips li {
+  display: grid; padding: 10px 16px; border-radius: 16px; min-width: 128px;
+  background: rgb(255 255 255 / .06); border: 1px solid rgb(255 255 255 / .14);
+}
+.hero-chips strong { font-family: var(--font-display); font-size: 1.7rem; line-height: 1; color: var(--gold-300); font-weight: 600; }
+.hero-chips span { font-size: .78rem; color: rgb(255 255 255 / .75); margin-top: 4px; }
+
+/* Arco con el video */
+.hero-visual { position: relative; padding: 18px 0 30px; }
+.hero-arch {
+  position: relative; width: min(100%, 480px); margin-left: auto; aspect-ratio: 4 / 5; max-height: 72vh;
+  border-radius: 999px 999px 28px 28px; overflow: hidden; background: var(--green-800);
+  box-shadow: 0 40px 80px -30px rgb(0 0 0 / .6), 0 0 0 8px rgb(255 255 255 / .05);
+}
+.hero-arch .hero-poster, .hero-arch .hero-video {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: none; transform: none;
+}
+.hero-arch::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgb(15 28 8 / .45)); }
+.hero-seal { position: absolute; left: max(0px, calc(50% - 300px)); top: 6%; z-index: 2; filter: drop-shadow(0 12px 24px rgb(0 0 0 / .35)); }
+.hero-seal-ring { transform-origin: 100px 100px; transform-box: view-box; animation: spin 22s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.hero-float {
+  position: absolute; z-index: 2; display: flex; align-items: center; gap: 10px;
+  background: rgb(255 255 255 / .94); color: var(--green-900); border-radius: 16px; padding: 10px 14px;
+  box-shadow: 0 18px 40px -16px rgb(0 0 0 / .45); font-weight: 600; font-size: .88rem; line-height: 1.25;
+  animation: float 6s ease-in-out infinite;
+}
+.hero-float small { display: block; font-size: .68rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--gold-500); }
+.hero-float--top { right: -8px; top: 24%; }
+.hero-float--bottom { left: max(0px, calc(50% - 280px)); bottom: 54px; animation-delay: -3s; }
+.hero-float-icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--green-700); color: var(--gold-300); }
+.hero-dots { display: flex; }
+.hero-dots i { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #fff; margin-left: -8px; background: var(--gold-500); }
+.hero-dots i:first-child { margin-left: 0; background: var(--green-700); }
+.hero-dots i:last-child { background: var(--green-600); }
+@keyframes float { 50% { transform: translateY(-8px); } }
+
+/* Cinta de amenidades */
+.ticker { margin-top: clamp(32px, 5vw, 56px); border-top: 1px solid rgb(255 255 255 / .1); background: rgb(0 0 0 / .14); overflow: hidden; }
+.ticker-track {
+  list-style: none; margin: 0; padding: 16px 0; display: flex; width: max-content;
+  animation: ticker 40s linear infinite;
+}
+.ticker-track li {
+  display: flex; align-items: center; gap: 28px; padding-right: 28px; white-space: nowrap;
+  font-family: var(--font-display); font-size: clamp(1.1rem, 1.6vw, 1.4rem); color: rgb(255 255 255 / .85);
+}
+.ticker-track li::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--gold-500); }
+@keyframes ticker { to { transform: translateX(-50%); } }
+.ticker:hover .ticker-track { animation-play-state: paused; }
+
+/* El encabezado se integra con la portada verde */
+.hero--v2 ~ * { }
+@media (max-width: 899px) {
+  .hero-grid { grid-template-columns: 1fr; }
+  .hero--v2 h1 { max-width: none; }
+  .hero-visual { padding: 0 0 10px; }
+  .hero-arch { width: min(100%, 420px); margin: 0 auto; aspect-ratio: 1 / 1; max-height: none; }
+  .hero-seal { width: 104px; height: 104px; left: 0; top: -14px; }
+  .hero-float--top { right: 0; top: auto; bottom: 34%; }
+  .hero-float--bottom { left: 0; bottom: 0; }
+}
+@media (max-width: 480px) {
+  .hero-chips li { min-width: 0; flex: 1 1 30%; padding: 8px 10px; }
+  .hero-chips strong { font-size: 1.35rem; }
+  .hero-chips span { font-size: .7rem; }
+  .hero-announce { font-size: .76rem; }
+  .hero-float { font-size: .78rem; padding: 8px 10px; }
+  .hero-float--top { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .ticker-track, .hero-seal-ring, .hero-float { animation: none; } }
+
+/* ---------- Popup de promociones con imágenes verticales (4:5) ---------- */
+.promo-dialog { width: min(100% - 32px, 820px); }
+.promo { flex-direction: row; align-items: center; gap: 22px; }
+.promo img { width: 46%; max-width: none; aspect-ratio: 4 / 5; object-fit: cover; margin: 0; }
+.promo-body { flex: 1; }
+.promo-kicker { display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #fff; background: #d7262f; padding: .35em .8em; border-radius: 999px; margin-bottom: 10px; }
+.promo-body h3 { font-size: clamp(1.5rem, 2.6vw, 2rem); }
+.promo-body p { font-size: .95rem; }
+@media (max-height: 760px) and (min-width: 600px) { .promo img { width: 38%; } }
+@media (max-width: 640px) {
+  .promo { flex-direction: column; align-items: stretch; gap: 10px; }
+  .promo img { width: auto; height: min(46vh, 420px); height: min(46dvh, 420px); margin: 0 auto; }
+  .promo-kicker { margin-bottom: 6px; }
+}
+@media (max-width: 480px) and (max-height: 620px) {
+  .promo img { height: 36dvh; }
+}
+.hero-announce-tag { white-space: nowrap; }
+@media (max-width: 520px) {
+  .hide-sm { display: none; }
+  .promo-kicker { display: none; }
+  .promo img { height: min(40vh, 380px); height: min(40dvh, 380px); }
+  .promo-body h3 { font-size: 1.4rem; margin-bottom: 2px; }
+  .promo-body p { font-size: .86rem; margin-bottom: 10px; }
+  .hero--v2 .hero-lead { font-size: 1rem; }
+}

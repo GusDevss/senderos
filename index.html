@@ -35,10 +35,10 @@
   <!-- Rendimiento -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="image" href="assets/img/portada-poster-movil.webp" media="(max-width: 767px)" fetchpriority="high">
-  <link rel="preload" as="image" href="assets/img/portada-poster.webp" media="(min-width: 768px)" fetchpriority="high">
+  <link rel="preload" as="image" href="assets/img/portada-poster-movil.webp" media="(max-width: 899px)" fetchpriority="high">
+  <link rel="preload" as="image" href="assets/img/portada-poster.webp" media="(min-width: 900px)" fetchpriority="high">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Poppins:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="assets/css/styles.css?v=ab92fffa">
+  <link rel="stylesheet" href="assets/css/styles.css?v=f1253419">
 
   <!-- Datos estructurados (schema.org) -->
   <script type="application/ld+json">
@@ -121,7 +121,7 @@
           {
             "@type": "Question",
             "name": "¿Cuánto cuesta un terreno en Los Senderos Residencial?",
-            "acceptedAnswer": { "@type": "Answer", "text": "Los terrenos en las privadas La Marquesa, Santiago y Antigua están disponibles desde $1.1 MDP en pago de contado. Hay promociones vigentes y, en privadas seleccionadas, crédito directo hasta 10 años. Contáctanos para conocer la disponibilidad y el precio actual." }
+            "acceptedAnswer": { "@type": "Answer", "text": "Los terrenos en las privadas La Marquesa, Santiago y Antigua están disponibles desde $1.1 MDP. Hay promociones vigentes, crédito directo hasta 10 años en La Marquesa y crédito Infonavit en Santiago y Antigua. Contáctanos para conocer la disponibilidad y el precio actual." }
           },
           {
             "@type": "Question",
@@ -181,52 +181,73 @@
   <main id="contenido">
 
     <!-- ============ PORTADA ============ -->
-    <section class="hero" aria-labelledby="hero-title">
-      <div class="hero-media" aria-hidden="true">
-        <picture>
-          <source media="(max-width: 767px)" srcset="assets/img/portada-poster-movil.webp">
-          <img class="hero-poster" src="assets/img/portada-poster.webp" alt="" width="1600" height="900" fetchpriority="high">
-        </picture>
-        <video class="hero-video" muted loop playsinline preload="none" disablepictureinpicture
-               data-hero-video
-               data-src-sm="assets/video/portada-854.mp4"
-               data-src-lg="assets/video/portada-1280.mp4"></video>
+    <section class="hero hero--v2" aria-labelledby="hero-title">
+      <div class="hero-bg" aria-hidden="true">
+        <img class="hero-ondas" src="assets/img/ondas.webp" alt="" width="600" height="666">
       </div>
 
-      <div class="container hero-content">
-        <p class="eyebrow eyebrow--light">Santiago de Querétaro</p>
-        <h1 id="hero-title">Terrenos en venta en Querétaro</h1>
-        <p class="hero-lead">Tu nuevo estilo de vida, rodeado de naturaleza y a minutos de todo.</p>
-
-        <ul class="hero-highlights">
-          <li><span class="check" aria-hidden="true"></span>A sólo 3 km del Centro de Querétaro</li>
-          <li><span class="check" aria-hidden="true"></span>Más de 25 amenidades para disfrutar en familia</li>
-          <li><span class="check" aria-hidden="true"></span>Plusvalía mayor al 15%</li>
-        </ul>
-
-        <div class="hero-actions">
-          <button class="btn btn--gold btn--lg" type="button" data-open-promos>
-            <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M21.4 11.6 12.4 2.6A2 2 0 0 0 11 2H4a2 2 0 0 0-2 2v7c0 .6.2 1 .6 1.4l9 9a2 2 0 0 0 2.8 0l7-7a2 2 0 0 0 0-2.8zM6.5 8a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>
-            Accede a promociones
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <button class="hero-announce" type="button" data-open-promos>
+            <span class="hero-announce-tag">Buen Fin</span>
+            <span>Descuentos desde $50,000<span class="hide-sm"> · 13 al 17 de noviembre</span></span>
+            <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
           </button>
-          <a class="btn btn--ghost btn--lg" href="https://wa.me/5214428230513?text=Hola%2C%20me%20gustar%C3%ADa%20recibir%20m%C3%A1s%20informaci%C3%B3n%20sobre%20Los%20Senderos%20Residencial%2C%20gracias" target="_blank" rel="noopener" data-track="whatsapp_hero">
-            Me interesa invertir
-          </a>
+
+          <h1 id="hero-title">Terrenos en venta en <em>Querétaro</em></h1>
+          <p class="hero-lead">Tu nuevo estilo de vida en Los Senderos Residencial: naturaleza, más de 25 amenidades y plusvalía, a sólo 3 km del centro.</p>
+
+          <ul class="hero-chips">
+            <li><strong>3 km</strong><span>del Centro de Querétaro</span></li>
+            <li><strong>+25</strong><span>amenidades en familia</span></li>
+            <li><strong>$1.1 MDP</strong><span>precio desde</span></li>
+          </ul>
+
+          <div class="hero-actions">
+            <button class="btn btn--gold btn--lg" type="button" data-open-promos>
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M21.4 11.6 12.4 2.6A2 2 0 0 0 11 2H4a2 2 0 0 0-2 2v7c0 .6.2 1 .6 1.4l9 9a2 2 0 0 0 2.8 0l7-7a2 2 0 0 0 0-2.8zM6.5 8a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>
+              Accede a promociones
+            </button>
+            <a class="btn btn--ghost btn--lg" href="https://wa.me/5214428230513?text=Hola%2C%20me%20gustar%C3%ADa%20recibir%20m%C3%A1s%20informaci%C3%B3n%20sobre%20Los%20Senderos%20Residencial%2C%20gracias" target="_blank" rel="noopener" data-track="whatsapp_hero">
+              Me interesa invertir
+            </a>
+          </div>
+        </div>
+
+        <div class="hero-visual" aria-hidden="true">
+          <div class="hero-arch">
+            <picture>
+              <source media="(max-width: 899px)" srcset="assets/img/portada-poster-movil.webp">
+              <img class="hero-poster" src="assets/img/portada-poster.webp" alt="" width="1600" height="900" fetchpriority="high">
+            </picture>
+            <video class="hero-video" muted loop playsinline preload="none" disablepictureinpicture
+                   data-hero-video
+                   data-src-sm="assets/video/portada-854.mp4"
+                   data-src-lg="assets/video/portada-1280.mp4"></video>
+          </div>
+
+          <svg class="hero-seal" viewBox="0 0 200 200" width="132" height="132">
+            <defs><path id="sealPath" d="M100,100 m-74,0 a74,74 0 1,1 148,0 a74,74 0 1,1 -148,0"/></defs>
+            <circle cx="100" cy="100" r="98" fill="#b1ad61"/>
+            <g class="hero-seal-ring"><text font-size="16" font-weight="600" fill="#1f3614" font-family="Poppins, sans-serif"><textPath href="#sealPath" textLength="462" lengthAdjust="spacing">PLUSVALÍA MAYOR AL 15% • LOS SENDEROS •</textPath></text></g>
+            <text class="hero-seal-num" x="100" y="112" text-anchor="middle" font-size="38" font-weight="600" fill="#1f3614" font-family="Cormorant Garamond, serif">+15%</text>
+          </svg>
+
+          <div class="hero-float hero-float--top">
+            <span class="hero-float-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+            </span>
+            <span><small>Ubicación</small>Av. Tlacote, Querétaro</span>
+          </div>
+          <div class="hero-float hero-float--bottom">
+            <span class="hero-dots"><i></i><i></i><i></i></span>
+            <span><small>3 privadas</small>Marquesa · Santiago · Antigua</span>
+          </div>
         </div>
       </div>
 
-      <a class="hero-scroll" href="#desarrollo" aria-label="Ir a la siguiente sección">
-        <span aria-hidden="true"></span>
-      </a>
-    </section>
-
-    <!-- ============ CIFRAS ============ -->
-    <section class="stats" aria-label="Los Senderos en cifras">
-      <div class="container stats-grid">
-        <div class="stat"><strong data-count="3" data-suffix=" km">3 km</strong><span>del Centro de Querétaro</span></div>
-        <div class="stat"><strong data-count="25" data-prefix="+">+25</strong><span>amenidades</span></div>
-        <div class="stat"><strong data-count="15" data-prefix="+" data-suffix="%">+15%</strong><span>de plusvalía</span></div>
-        <div class="stat"><strong data-count="3">3</strong><span>privadas residenciales</span></div>
+      <div class="ticker" aria-hidden="true">
+        <ul class="ticker-track"><li>Alberca tipo resort</li><li>Cancha de pádel</li><li>Ciclovía</li><li>Pista de jogging</li><li>Gimnasio</li><li>Health &amp; wellness center</li><li>Salón de eventos</li><li>Juegos infantiles</li><li>Zona grill</li><li>Pet park</li><li>Áreas verdes</li><li>Casa club</li><li>Alberca tipo resort</li><li>Cancha de pádel</li><li>Ciclovía</li><li>Pista de jogging</li><li>Gimnasio</li><li>Health &amp; wellness center</li><li>Salón de eventos</li><li>Juegos infantiles</li><li>Zona grill</li><li>Pet park</li><li>Áreas verdes</li><li>Casa club</li></ul>
       </div>
     </section>
 
@@ -495,10 +516,11 @@
             <button class="privada-map" type="button" data-lightbox="assets/img/disponibilidad-santiago.webp" data-caption="Disponibilidad · Santiago Privada" aria-label="Ampliar plano de disponibilidad de Santiago">
               <img src="assets/img/disponibilidad-santiago.webp" alt="Plano de disponibilidad de terrenos en Santiago Privada" width="1000" height="563" loading="lazy">
             </button>
-            <h3>Santiago · Privada</h3>
+            <h3>Santiago · Privada Club</h3>
             <ul class="privada-perks">
-              <li>Certeza jurídica</li>
-              <li>Plusvalía y ubicación estratégica</li>
+              <li>Acceso directo a 5 de Febrero</li>
+              <li>Aplica crédito Infonavit</li>
+              <li>Certeza jurídica y plusvalía</li>
             </ul>
             <a class="btn btn--gold btn--block" href="https://wa.me/5214428230513?text=Hola%2C%20me%20interesa%20un%20terreno%20en%20Santiago%20Privada" target="_blank" rel="noopener" data-track="whatsapp_santiago">Me interesa Santiago</a>
           </article>
@@ -510,13 +532,13 @@
             </button>
             <h3>Antigua · Privada Club</h3>
             <ul class="privada-perks">
-              <li>Escritura inmediata</li>
-              <li>Entrega inmediata</li>
+              <li>Escritura y entrega inmediata</li>
+              <li>Aplica crédito Infonavit</li>
             </ul>
             <a class="btn btn--gold btn--block" href="https://wa.me/5214428230513?text=Hola%2C%20me%20interesa%20un%20terreno%20en%20Antigua%20Privada%20Club" target="_blank" rel="noopener" data-track="whatsapp_antigua">Me interesa Antigua</a>
           </article>
         </div>
-        <p class="fine-print">*Precio desde $1.1 MDP aplica en pago de contado. Sujeto a disponibilidad.</p>
+        <p class="fine-print">*Precios desde $1.1 MDP, sujetos a disponibilidad. Consulta condiciones con un asesor.</p>
         <div class="center">
           <button class="btn btn--ghost" type="button" data-open-promos>Ver promociones vigentes</button>
         </div>
@@ -644,7 +666,7 @@
           </details>
           <details class="reveal" name="faq">
             <summary>¿Cuánto cuesta un terreno en Los Senderos Residencial?</summary>
-            <div class="faq-body"><p>Los terrenos en las privadas La Marquesa, Santiago y Antigua están disponibles desde $1.1 MDP en pago de contado. Hay promociones vigentes y, en privadas seleccionadas, crédito directo hasta 10 años. <a href="#contacto">Contáctanos</a> para conocer la disponibilidad y el precio actual.</p></div>
+            <div class="faq-body"><p>Los terrenos en las privadas La Marquesa, Santiago y Antigua están disponibles desde $1.1 MDP. Hay promociones vigentes, crédito directo hasta 10 años en La Marquesa y crédito Infonavit en Santiago y Antigua. <a href="#contacto">Contáctanos</a> para conocer la disponibilidad y el precio actual.</p></div>
           </details>
           <details class="reveal" name="faq">
             <summary>¿Qué le da más valor a un terreno?</summary>
@@ -728,33 +750,36 @@
     <div class="promo-dialog-inner">
       <button class="dialog-close" type="button" data-close aria-label="Cerrar promociones">×</button>
       <header class="promo-head">
-        <p class="eyebrow">Por tiempo limitado</p>
-        <h2 id="promos-title">Promociones vigentes</h2>
+        <p class="eyebrow">Del 13 al 17 de noviembre</p>
+        <h2 id="promos-title">Promociones Buen Fin</h2>
       </header>
 
       <ul class="promo-track" data-promo-track>
         <li class="promo">
-          <img src="assets/img/promo-la-marquesa.webp" alt="Promoción La Marquesa: invierte en tu terreno con crédito directo hasta 10 años, sin revisión de buró y sin comprobación de ingresos, desde $1.1 MDP" width="540" height="540" loading="lazy">
+          <img src="assets/img/promo-buen-fin-la-marquesa.webp" alt="Promoción Buen Fin La Marquesa: terrenos desde $1.1 MDP, descuentos a partir de $50 mil pesos y crédito directo hasta 10 años" width="720" height="900" loading="lazy">
           <div class="promo-body">
+            <span class="promo-kicker">Buen Fin · 13 al 17 de noviembre</span>
             <h3>La Marquesa Privada Club</h3>
-            <p>Crédito directo hasta 10 años, sin revisión de buró y sin comprobación de ingresos. <strong>Desde $1.1 MDP*</strong></p>
-            <a class="btn btn--gold btn--block" href="https://wa.me/5214428230513?text=Hola%2C%20me%20interesa%20la%20promoci%C3%B3n%20de%20La%20Marquesa%20Privada%20Club" target="_blank" rel="noopener" data-track="promo_marquesa">Quiero esta promoción</a>
+            <p>Terrenos desde <strong>$1.1 MDP</strong>, descuentos a partir de <strong>$50,000</strong> y crédito directo hasta 10 años.</p>
+            <a class="btn btn--gold btn--block" href="https://wa.me/5214428230513?text=Hola%2C%20me%20interesa%20la%20promoci%C3%B3n%20del%20Buen%20Fin%20en%20La%20Marquesa%20Privada%20Club" target="_blank" rel="noopener" data-track="promo_la_marquesa">Quiero esta promoción</a>
           </div>
         </li>
         <li class="promo">
-          <img src="assets/img/promo-antigua.webp" alt="Promoción Antigua: escritura y entrega inmediata, desde $1.1 MDP" width="540" height="540" loading="lazy">
+          <img src="assets/img/promo-buen-fin-santiago.webp" alt="Promoción Buen Fin Santiago: terreno desde $1.1 MDP, acceso directo a 5 de Febrero, descuentos a partir de $50 mil pesos y crédito Infonavit" width="720" height="900" loading="lazy">
           <div class="promo-body">
+            <span class="promo-kicker">Buen Fin · 13 al 17 de noviembre</span>
+            <h3>Santiago Privada Club</h3>
+            <p>Tu terreno desde <strong>$1.1 MDP</strong> con acceso directo a 5 de Febrero, descuentos a partir de <strong>$50,000</strong> y crédito Infonavit.</p>
+            <a class="btn btn--gold btn--block" href="https://wa.me/5214428230513?text=Hola%2C%20me%20interesa%20la%20promoci%C3%B3n%20del%20Buen%20Fin%20en%20Santiago%20Privada%20Club" target="_blank" rel="noopener" data-track="promo_santiago">Quiero esta promoción</a>
+          </div>
+        </li>
+        <li class="promo">
+          <img src="assets/img/promo-buen-fin-antigua.webp" alt="Promoción Buen Fin Antigua: terrenos desde $1.1 MDP y descuentos a partir de $50 mil pesos" width="720" height="900" loading="lazy">
+          <div class="promo-body">
+            <span class="promo-kicker">Buen Fin · 13 al 17 de noviembre</span>
             <h3>Antigua Privada Club</h3>
-            <p>Escritura y entrega inmediata. <strong>Desde $1.1 MDP*</strong></p>
-            <a class="btn btn--gold btn--block" href="https://wa.me/5214428230513?text=Hola%2C%20me%20interesa%20la%20promoci%C3%B3n%20de%20Antigua%20Privada%20Club" target="_blank" rel="noopener" data-track="promo_antigua">Quiero esta promoción</a>
-          </div>
-        </li>
-        <li class="promo">
-          <img src="assets/img/promo-santiago.webp" alt="Promoción Santiago: certeza jurídica, plusvalía y ubicación estratégica, desde $1.1 MDP" width="540" height="540" loading="lazy">
-          <div class="promo-body">
-            <h3>Santiago Privada</h3>
-            <p>Certeza jurídica, plusvalía y ubicación estratégica. <strong>Desde $1.1 MDP*</strong></p>
-            <a class="btn btn--gold btn--block" href="https://wa.me/5214428230513?text=Hola%2C%20me%20interesa%20la%20promoci%C3%B3n%20de%20Santiago%20Privada" target="_blank" rel="noopener" data-track="promo_santiago">Quiero esta promoción</a>
+            <p>Terrenos desde <strong>$1.1 MDP</strong> y descuentos a partir de <strong>$50,000</strong>. Aplica crédito Infonavit.</p>
+            <a class="btn btn--gold btn--block" href="https://wa.me/5214428230513?text=Hola%2C%20me%20interesa%20la%20promoci%C3%B3n%20del%20Buen%20Fin%20en%20Antigua%20Privada%20Club" target="_blank" rel="noopener" data-track="promo_antigua">Quiero esta promoción</a>
           </div>
         </li>
       </ul>
@@ -764,7 +789,7 @@
         <div class="promo-dots" data-promo-dots></div>
         <button class="icon-btn icon-btn--dark" type="button" data-promo-next aria-label="Promoción siguiente">›</button>
       </div>
-      <p class="fine-print">*Aplica en pago de contado. Sujeto a disponibilidad.</p>
+      <p class="fine-print">Descuentos válidos del 13 al 17 de noviembre. Sujeto a disponibilidad; consulta condiciones con un asesor.</p>
     </div>
   </dialog>
 
