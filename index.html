@@ -19,8 +19,8 @@
   <meta property="og:url" content="https://lossenderosresidencial.com.mx/">
   <meta property="og:image" content="https://lossenderosresidencial.com.mx/assets/img/og-terrenos-en-venta-queretaro.jpg">
   <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="800">
-  <meta property="og:image:alt" content="Casa club con alberca tipo resort en Los Senderos Residencial, Querétaro">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Health &amp; wellness center de Los Senderos Residencial al atardecer, terrenos en venta en Querétaro">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Terrenos en Venta en Querétaro | Los Senderos Residencial">
   <meta name="twitter:description" content="Lotes residenciales a 3 km del Centro de Querétaro con más de 25 amenidades y plusvalía mayor al 15%.">
@@ -160,6 +160,7 @@
           <li><a href="#desarrollo">El desarrollo</a></li>
           <li><a href="#amenidades">Amenidades</a></li>
           <li><a href="#casa-club">Casa club</a></li>
+          <li><a href="#galeria">Galería</a></li>
           <li><a href="#privadas">Privadas</a></li>
           <li><a href="#recorrido-virtual">Recorrido virtual</a></li>
           <li><a href="#contacto">Contacto</a></li>
@@ -222,10 +223,10 @@
     <!-- ============ CIFRAS ============ -->
     <section class="stats" aria-label="Los Senderos en cifras">
       <div class="container stats-grid">
-        <div class="stat"><strong>3 km</strong><span>del Centro de Querétaro</span></div>
-        <div class="stat"><strong>+25</strong><span>amenidades</span></div>
-        <div class="stat"><strong>+15%</strong><span>de plusvalía</span></div>
-        <div class="stat"><strong>3</strong><span>privadas residenciales</span></div>
+        <div class="stat"><strong data-count="3" data-suffix=" km">3 km</strong><span>del Centro de Querétaro</span></div>
+        <div class="stat"><strong data-count="25" data-prefix="+">+25</strong><span>amenidades</span></div>
+        <div class="stat"><strong data-count="15" data-prefix="+" data-suffix="%">+15%</strong><span>de plusvalía</span></div>
+        <div class="stat"><strong data-count="3">3</strong><span>privadas residenciales</span></div>
       </div>
     </section>
 
@@ -282,38 +283,41 @@
       </div>
     </section>
 
-    <!-- ============ GALERÍA ============ -->
-    <section class="section gallery-section" aria-labelledby="galeria-title">
+    <!-- ============ GALERÍA (mosaico con filtros) ============ -->
+    <section class="section gallery-section" id="galeria" aria-labelledby="galeria-title">
       <div class="container">
         <header class="section-head section-head--row reveal">
           <div>
             <p class="eyebrow eyebrow--light">Galería</p>
-            <h2 id="galeria-title">Galería de amenidades</h2>
+            <h2 id="galeria-title">Así se vive Los Senderos</h2>
           </div>
-          <div class="carousel-controls">
-            <button class="icon-btn" type="button" data-scroll-prev="galeria" aria-label="Imágenes anteriores">‹</button>
-            <button class="icon-btn" type="button" data-scroll-next="galeria" aria-label="Imágenes siguientes">›</button>
+          <div class="filters" role="group" aria-label="Filtrar galería" data-filters>
+            <button type="button" class="chip" data-filter="todas" aria-pressed="true">Todas</button>
+            <button type="button" class="chip" data-filter="casa-club" aria-pressed="false">Casa club</button>
+            <button type="button" class="chip" data-filter="deporte" aria-pressed="false">Deporte</button>
+            <button type="button" class="chip" data-filter="familia" aria-pressed="false">Familia y naturaleza</button>
+            <button type="button" class="chip" data-filter="acceso" aria-pressed="false">Acceso</button>
           </div>
         </header>
-      </div>
 
-      <ul class="gallery" id="galeria" data-gallery>
-        <li><button type="button" data-lightbox="assets/img/drone-casa-club-alberca.webp"><img src="assets/img/drone-casa-club-alberca.webp" alt="Vista aérea de la casa club y alberca de Los Senderos Residencial" width="1600" height="900" loading="lazy"><span>Casa club</span></button></li>
-        <li><button type="button" data-lightbox="assets/img/amenidad-alberca-tipo-resort.webp"><img src="assets/img/amenidad-alberca-tipo-resort.webp" alt="Alberca tipo resort en terrenos residenciales de Querétaro" width="400" height="400" loading="lazy"><span>Alberca tipo resort</span></button></li>
-        <li><button type="button" data-lightbox="assets/img/amenidad-cancha-de-padel.webp"><img src="assets/img/amenidad-cancha-de-padel.webp" alt="Cancha de pádel en Los Senderos Residencial" width="400" height="400" loading="lazy"><span>Cancha de pádel</span></button></li>
-        <li><button type="button" data-lightbox="assets/img/amenidad-health-wellness-center.webp"><img src="assets/img/amenidad-health-wellness-center.webp" alt="Health & wellness center de Los Senderos Residencial al atardecer" width="400" height="400" loading="lazy"><span>Health &amp; wellness center</span></button></li>
-        <li><button type="button" data-lightbox="assets/img/amenidad-zona-grill.webp"><img src="assets/img/amenidad-zona-grill.webp" alt="Zona grill con vista nocturna en Los Senderos" width="400" height="225" loading="lazy"><span>Zona grill</span></button></li>
-        <li><button type="button" data-lightbox="assets/img/drone-sendero-deportivo.webp"><img src="assets/img/drone-sendero-deportivo.webp" alt="Sendero deportivo y ciclovía que recorre Los Senderos Residencial" width="1600" height="900" loading="lazy"><span>Sendero deportivo</span></button></li>
-        <li><button type="button" data-lightbox="assets/img/amenidad-juegos-infantiles.webp"><img src="assets/img/amenidad-juegos-infantiles.webp" alt="Juegos infantiles en lotes residenciales de Querétaro" width="400" height="400" loading="lazy"><span>Juegos infantiles</span></button></li>
-        <li><button type="button" data-lightbox="assets/img/amenidad-terraza-fitness.webp"><img src="assets/img/amenidad-terraza-fitness.webp" alt="Terraza fitness con vista a las áreas verdes" width="400" height="267" loading="lazy"><span>Terraza fitness</span></button></li>
-        <li><button type="button" data-lightbox="assets/img/amenidad-asoleadero.webp"><img src="assets/img/amenidad-asoleadero.webp" alt="Asoleadero y áreas recreativas" width="400" height="267" loading="lazy"><span>Asoleadero</span></button></li>
-        <li><button type="button" data-lightbox="assets/img/amenidad-areas-verdes.webp"><img src="assets/img/amenidad-areas-verdes.webp" alt="Áreas verdes con árboles en Los Senderos Residencial" width="400" height="267" loading="lazy"><span>Áreas verdes</span></button></li>
-        <li><button type="button" data-lightbox="assets/img/drone-glorieta.webp"><img src="assets/img/drone-glorieta.webp" alt="Vista aérea de la glorieta y jardines del desarrollo" width="1600" height="900" loading="lazy"><span>Jardines</span></button></li>
-        <li><button type="button" data-lightbox="assets/img/amenidad-cocina-bar.webp"><img src="assets/img/amenidad-cocina-bar.webp" alt="Cocina bar de la casa club" width="400" height="225" loading="lazy"><span>Cocina bar</span></button></li>
-        <li><button type="button" data-lightbox="assets/img/amenidad-oficina-administrativa.webp"><img src="assets/img/amenidad-oficina-administrativa.webp" alt="Oficinas administrativas de Los Senderos Residencial" width="400" height="267" loading="lazy"><span>Oficinas administrativas</span></button></li>
-        <li><button type="button" data-lightbox="assets/img/amenidad-banos-con-vestidores.webp"><img src="assets/img/amenidad-banos-con-vestidores.webp" alt="Baños con vestidores" width="400" height="267" loading="lazy"><span>Baños con vestidores</span></button></li>
-        <li><button type="button" data-lightbox="assets/img/drone-acceso.webp"><img src="assets/img/drone-acceso.webp" alt="Acceso principal controlado de Los Senderos Residencial" width="1600" height="900" loading="lazy"><span>Acceso principal</span></button></li>
-      </ul>
+        <ul class="bento" data-gallery>
+        <li class="g-item g-big" data-cat="casa-club"><button type="button" data-lightbox="assets/img/foto-health-wellness-center.webp" data-caption="Health &amp; wellness center"><img src="assets/img/foto-health-wellness-center-900.webp" srcset="assets/img/foto-health-wellness-center-900.webp 900w, assets/img/foto-health-wellness-center.webp 1920w" sizes="(max-width: 767px) 100vw, 50vw" alt="Health &amp; wellness center de Los Senderos Residencial con muros de piedra y terraza al atardecer" width="1920" height="1280" loading="lazy"><span>Health &amp; wellness center</span></button></li>
+        <li class="g-item g-wide" data-cat="casa-club"><button type="button" data-lightbox="assets/img/foto-alberca-noche.webp" data-caption="Alberca de noche"><img src="assets/img/foto-alberca-noche-900.webp" srcset="assets/img/foto-alberca-noche-900.webp 900w, assets/img/foto-alberca-noche.webp 1920w" sizes="(max-width: 767px) 100vw, 50vw" alt="Alberca tipo resort iluminada de noche con la cancha de pádel al fondo" width="1920" height="1080" loading="lazy"><span>Alberca de noche</span></button></li>
+        <li class="g-item g-tall" data-cat="deporte"><button type="button" data-lightbox="assets/img/foto-padel-atardecer.webp" data-caption="Pádel al atardecer"><img src="assets/img/foto-padel-atardecer-900.webp" srcset="assets/img/foto-padel-atardecer-900.webp 900w, assets/img/foto-padel-atardecer.webp 1920w" sizes="(max-width: 767px) 100vw, 50vw" alt="Cancha de pádel al atardecer en Los Senderos Residencial, Querétaro" width="1920" height="1280" loading="lazy"><span>Pádel al atardecer</span></button></li>
+        <li class="g-item" data-cat="acceso"><button type="button" data-lightbox="assets/img/foto-espejo-de-agua-acceso.webp" data-caption="Espejo de agua"><img src="assets/img/foto-espejo-de-agua-acceso-900.webp" srcset="assets/img/foto-espejo-de-agua-acceso-900.webp 900w, assets/img/foto-espejo-de-agua-acceso.webp 1920w" sizes="(max-width: 767px) 100vw, 50vw" alt="Espejo de agua y pórtico del acceso principal al amanecer" width="1920" height="1280" loading="lazy"><span>Espejo de agua</span></button></li>
+        <li class="g-item g-tall" data-cat="deporte"><button type="button" data-lightbox="assets/img/foto-ciclovia-sendero.webp" data-caption="Ciclovía"><img src="assets/img/foto-ciclovia-sendero-900.webp" srcset="assets/img/foto-ciclovia-sendero-900.webp 900w, assets/img/foto-ciclovia-sendero.webp 1920w" sizes="(max-width: 767px) 100vw, 50vw" alt="Ciclovía del sendero deportivo entre árboles maduros" width="1920" height="1280" loading="lazy"><span>Ciclovía</span></button></li>
+        <li class="g-item g-wide" data-cat="familia"><button type="button" data-lightbox="assets/img/foto-juegos-infantiles-parque.webp" data-caption="Juegos infantiles"><img src="assets/img/foto-juegos-infantiles-parque-900.webp" srcset="assets/img/foto-juegos-infantiles-parque-900.webp 900w, assets/img/foto-juegos-infantiles-parque.webp 1920w" sizes="(max-width: 767px) 100vw, 50vw" alt="Parque con juegos infantiles junto al sendero deportivo" width="1920" height="1280" loading="lazy"><span>Juegos infantiles</span></button></li>
+        <li class="g-item" data-cat="acceso"><button type="button" data-lightbox="assets/img/foto-acceso-principal.webp" data-caption="Acceso principal"><img src="assets/img/foto-acceso-principal-900.webp" srcset="assets/img/foto-acceso-principal-900.webp 900w, assets/img/foto-acceso-principal.webp 1920w" sizes="(max-width: 767px) 100vw, 50vw" alt="Acceso principal con caseta y muros de piedra de Los Senderos Residencial" width="1920" height="1280" loading="lazy"><span>Acceso principal</span></button></li>
+        <li class="g-item g-wide" data-cat="deporte"><button type="button" data-lightbox="assets/img/foto-cancha-padel.webp" data-caption="Cancha de pádel"><img src="assets/img/foto-cancha-padel-900.webp" srcset="assets/img/foto-cancha-padel-900.webp 900w, assets/img/foto-cancha-padel.webp 1920w" sizes="(max-width: 767px) 100vw, 50vw" alt="Cancha de pádel profesional con pasto sintético y muros de cristal" width="1920" height="1080" loading="lazy"><span>Cancha de pádel</span></button></li>
+        <li class="g-item g-wide" data-cat="casa-club"><button type="button" data-lightbox="assets/img/drone-casa-club-alberca.webp" data-caption="Casa club desde el aire"><img src="assets/img/drone-casa-club-alberca.webp" alt="Vista aérea de la casa club y alberca de Los Senderos Residencial" width="1600" height="900" loading="lazy"><span>Casa club desde el aire</span></button></li>
+        <li class="g-item" data-cat="casa-club"><button type="button" data-lightbox="assets/img/amenidad-zona-grill.webp" data-caption="Zona grill"><img src="assets/img/amenidad-zona-grill.webp" alt="Zona grill con vista nocturna en Los Senderos" width="400" height="225" loading="lazy"><span>Zona grill</span></button></li>
+        <li class="g-item" data-cat="casa-club"><button type="button" data-lightbox="assets/img/amenidad-cocina-bar.webp" data-caption="Cocina bar"><img src="assets/img/amenidad-cocina-bar.webp" alt="Cocina bar de la casa club" width="400" height="225" loading="lazy"><span>Cocina bar</span></button></li>
+        <li class="g-item" data-cat="deporte"><button type="button" data-lightbox="assets/img/amenidad-terraza-fitness.webp" data-caption="Terraza fitness"><img src="assets/img/amenidad-terraza-fitness.webp" alt="Terraza fitness con vista a las áreas verdes" width="400" height="267" loading="lazy"><span>Terraza fitness</span></button></li>
+        <li class="g-item g-wide" data-cat="familia"><button type="button" data-lightbox="assets/img/drone-glorieta.webp" data-caption="Jardines"><img src="assets/img/drone-glorieta.webp" alt="Vista aérea de la glorieta y jardines del desarrollo" width="1600" height="900" loading="lazy"><span>Jardines</span></button></li>
+        <li class="g-item" data-cat="familia"><button type="button" data-lightbox="assets/img/amenidad-areas-verdes.webp" data-caption="Áreas verdes"><img src="assets/img/amenidad-areas-verdes.webp" alt="Áreas verdes con árboles en Los Senderos Residencial" width="400" height="267" loading="lazy"><span>Áreas verdes</span></button></li>
+        <li class="g-item" data-cat="deporte"><button type="button" data-lightbox="assets/img/drone-sendero-deportivo.webp" data-caption="Sendero deportivo"><img src="assets/img/drone-sendero-deportivo.webp" alt="Sendero deportivo y ciclovía que recorre Los Senderos Residencial" width="1600" height="900" loading="lazy"><span>Sendero deportivo</span></button></li>
+        </ul>
+      </div>
     </section>
 
     <!-- ============ CASA CLUB (video vertical + panorámica) ============ -->
@@ -378,9 +382,9 @@
         <h2 id="invertir-title">¿Por qué invertir en terrenos en Querétaro?</h2>
         <p>Querétaro se ha consolidado como un destino clave para la inversión en México gracias a su ubicación estratégica, infraestructura de primer nivel y un crecimiento económico superior al promedio nacional.</p>
         <ul class="invest-facts">
-          <li><strong>+1,500</strong><span>empresas internacionales</span></li>
-          <li><strong>+40</strong><span>parques industriales</span></li>
-          <li><strong>+15%</strong><span>plusvalía en Los Senderos</span></li>
+          <li><strong data-count="1500" data-prefix="+">+1,500</strong><span>empresas internacionales</span></li>
+          <li><strong data-count="40" data-prefix="+">+40</strong><span>parques industriales</span></li>
+          <li><strong data-count="15" data-prefix="+" data-suffix="%">+15%</strong><span>plusvalía en Los Senderos</span></li>
         </ul>
         <a class="btn btn--gold" href="https://wa.me/5214428230513?text=Hola%2C%20quiero%20invertir%20en%20un%20terreno%20en%20Los%20Senderos%20Residencial" target="_blank" rel="noopener" data-track="whatsapp_invertir">Quiero invertir</a>
       </div>
@@ -421,9 +425,24 @@
         </figure>
       </div>
       <div class="container">
-        <button class="map-card reveal" type="button" data-lightbox="assets/img/mapa-amenidades-sendero-deportivo.webp" aria-label="Ampliar mapa de amenidades y sendero deportivo">
-          <img src="assets/img/mapa-amenidades-sendero-deportivo.webp" alt="Mapa de amenidades y sendero deportivo de Los Senderos Residencial" width="1600" height="1083" loading="lazy">
-        </button>
+        <div class="masterplan reveal" data-masterplan>
+          <div class="masterplan-map">
+            <img src="assets/img/mapa-amenidades-sendero-deportivo.webp" alt="Mapa de amenidades y sendero deportivo de Los Senderos Residencial" width="1600" height="1083" loading="lazy">
+          <button type="button" class="pin" style="--x:88.6%;--y:29.0%" data-pin data-title="Acceso principal" data-text="Pórtico con caseta de vigilancia, espejo de agua y muros de piedra que dan la bienvenida al desarrollo." data-img="assets/img/foto-acceso-principal-900.webp" data-alt="Acceso principal de Los Senderos Residencial" aria-label="Ver Acceso principal" aria-expanded="false"><span>1</span></button>
+          <button type="button" class="pin" style="--x:77.4%;--y:52.3%" data-pin data-title="Ciclovía" data-text="Ciclovía de doble sentido que recorre todo el sendero entre árboles maduros y jardines." data-img="assets/img/foto-ciclovia-sendero-900.webp" data-alt="Ciclovía del sendero deportivo" aria-label="Ver Ciclovía" aria-expanded="false"><span>2</span></button>
+          <button type="button" class="pin" style="--x:80.3%;--y:40.6%" data-pin data-title="Pista de jogging" data-text="Andador para correr o caminar a lo largo del sendero deportivo, conectado con todas las privadas." data-img="assets/img/drone-sendero-deportivo.webp" data-alt="Sendero deportivo visto desde el aire" aria-label="Ver Pista de jogging" aria-expanded="false"><span>3</span></button>
+          <button type="button" class="pin" style="--x:58.9%;--y:74.0%" data-pin data-title="Juegos infantiles" data-text="Parques con juegos para niños, pisos de seguridad y áreas de sombra a lo largo del sendero." data-img="assets/img/foto-juegos-infantiles-parque-900.webp" data-alt="Juegos infantiles del sendero deportivo" aria-label="Ver Juegos infantiles" aria-expanded="false"><span>4</span></button>
+          </div>
+          <aside class="pin-card" data-pin-card aria-live="polite">
+            <img src="assets/img/foto-acceso-principal-900.webp" alt="Acceso principal de Los Senderos Residencial" width="900" height="600" loading="lazy" data-pin-img>
+            <div class="pin-card-body">
+              <p class="eyebrow">Explora el masterplan</p>
+              <h3 data-pin-title>Toca los puntos del mapa</h3>
+              <p data-pin-text>Descubre el acceso principal, la ciclovía, la pista de jogging y los juegos infantiles del sendero deportivo.</p>
+              <button type="button" class="btn btn--link" data-lightbox="assets/img/mapa-amenidades-sendero-deportivo.webp" data-caption="Mapa de amenidades y sendero deportivo">Ver mapa completo →</button>
+            </div>
+          </aside>
+        </div>
       </div>
     </section>
 
@@ -440,7 +459,7 @@
         <div class="privada-grid">
           <article class="privada reveal">
             <div class="privada-logo"><img src="assets/img/logo-la-marquesa.webp" alt="La Marquesa Privada Club" width="450" height="224" loading="lazy"></div>
-            <button class="privada-map" type="button" data-lightbox="assets/img/disponibilidad-marquesa.webp" aria-label="Ampliar plano de disponibilidad de La Marquesa">
+            <button class="privada-map" type="button" data-lightbox="assets/img/disponibilidad-marquesa.webp" data-caption="Disponibilidad · La Marquesa Privada Club" aria-label="Ampliar plano de disponibilidad de La Marquesa">
               <img src="assets/img/disponibilidad-marquesa.webp" alt="Plano de disponibilidad de terrenos en La Marquesa Privada Club" width="1000" height="563" loading="lazy">
             </button>
             <h3>La Marquesa · Privada Club</h3>
@@ -453,7 +472,7 @@
 
           <article class="privada reveal">
             <div class="privada-logo"><img src="assets/img/logo-santiago.webp" alt="Santiago Privada" width="450" height="224" loading="lazy"></div>
-            <button class="privada-map" type="button" data-lightbox="assets/img/disponibilidad-santiago.webp" aria-label="Ampliar plano de disponibilidad de Santiago">
+            <button class="privada-map" type="button" data-lightbox="assets/img/disponibilidad-santiago.webp" data-caption="Disponibilidad · Santiago Privada" aria-label="Ampliar plano de disponibilidad de Santiago">
               <img src="assets/img/disponibilidad-santiago.webp" alt="Plano de disponibilidad de terrenos en Santiago Privada" width="1000" height="563" loading="lazy">
             </button>
             <h3>Santiago · Privada</h3>
@@ -466,7 +485,7 @@
 
           <article class="privada reveal">
             <div class="privada-logo"><img src="assets/img/logo-antigua.webp" alt="Antigua Privada Club" width="300" height="118" loading="lazy"></div>
-            <button class="privada-map" type="button" data-lightbox="assets/img/disponibilidad-antigua.webp" aria-label="Ampliar plano de disponibilidad de Antigua">
+            <button class="privada-map" type="button" data-lightbox="assets/img/disponibilidad-antigua.webp" data-caption="Disponibilidad · Antigua Privada Club" aria-label="Ampliar plano de disponibilidad de Antigua">
               <img src="assets/img/disponibilidad-antigua.webp" alt="Plano de disponibilidad de terrenos en Antigua Privada Club" width="1000" height="563" loading="lazy">
             </button>
             <h3>Antigua · Privada Club</h3>
@@ -480,6 +499,22 @@
         <p class="fine-print">*Precio desde $1.1 MDP aplica en pago de contado. Sujeto a disponibilidad.</p>
         <div class="center">
           <button class="btn btn--ghost" type="button" data-open-promos>Ver promociones vigentes</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ BANDA CTA CON PARALLAX ============ -->
+    <section class="cta-band" aria-labelledby="cta-band-title">
+      <div class="cta-band-media" aria-hidden="true">
+        <img src="assets/img/foto-espejo-de-agua-acceso-900.webp" srcset="assets/img/foto-espejo-de-agua-acceso-900.webp 900w, assets/img/foto-espejo-de-agua-acceso.webp 1920w" sizes="100vw" alt="" width="1920" height="1280" loading="lazy" data-parallax>
+      </div>
+      <div class="container cta-band-inner reveal">
+        <p class="eyebrow eyebrow--light">Tu nuevo estilo de vida</p>
+        <h2 id="cta-band-title">Ven a conocer Los Senderos en persona</h2>
+        <p>Agenda un recorrido por la casa club, el sendero deportivo y los terrenos disponibles en cada privada.</p>
+        <div class="hero-actions">
+          <a class="btn btn--gold btn--lg" href="#contacto">Agendar recorrido</a>
+          <button class="btn btn--ghost btn--lg" type="button" data-open-promos>Ver promociones</button>
         </div>
       </div>
     </section>
@@ -621,6 +656,7 @@
         <ul>
           <li><a href="#amenidades">Amenidades</a></li>
           <li><a href="#casa-club">Casa club</a></li>
+          <li><a href="#galeria">Galería</a></li>
           <li><a href="#privadas">Privadas</a></li>
           <li><a href="#recorrido-virtual">Recorrido virtual</a></li>
           <li><a href="aviso-de-privacidad.html">Aviso de privacidad</a></li>
@@ -697,7 +733,12 @@
   <!-- Visor de imágenes -->
   <dialog class="lightbox" data-lightbox-dialog aria-label="Imagen ampliada">
     <button class="dialog-close dialog-close--light" type="button" data-close aria-label="Cerrar imagen">×</button>
-    <img src="" alt="" data-lightbox-img>
+    <button class="lb-nav lb-prev" type="button" data-lb-prev aria-label="Imagen anterior">‹</button>
+    <figure class="lb-figure">
+      <img src="" alt="" data-lightbox-img>
+      <figcaption><span data-lb-caption></span> <span class="lb-count" data-lb-count></span></figcaption>
+    </figure>
+    <button class="lb-nav lb-next" type="button" data-lb-next aria-label="Imagen siguiente">›</button>
   </dialog>
 
   <script src="assets/js/main.js" defer></script>

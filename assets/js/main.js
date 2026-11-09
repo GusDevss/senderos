@@ -255,33 +255,160 @@
     }
   }
 
-  /* ---------- Visor de imágenes ---------- */
+  /* ---------- Visor de imágenes (con navegación en la galería) ---------- */
   var lb = $('[data-lightbox-dialog]');
   if (lb) {
     var lbImg = $('[data-lightbox-img]', lb);
-    $$('[data-lightbox]').forEach(function (el) {
-      el.addEventListener('click', function (e) {
-        e.preventDefault();
-        var img = $('img', el);
-        lbImg.src = el.getAttribute('data-lightbox');
-        lbImg.alt = img ? img.alt : '';
-        openDialog(lb);
-      });
+    var lbCap = $('[data-lb-caption]', lb);
+    var lbCount = $('[data-lb-count]', lb);
+    var lbList = [], lbIndex = 0;
+
+    var itemData = function (el) {
+      var img = $('img', el);
+      return { src: el.getAttribute('data-lightbox'), alt: img ? img.alt : '', caption: el.getAttribute('data-caption') || (img ? img.alt : '') };
+    };
+    var showAt = function (i) {
+      lbIndex = (i + lbList.length) % lbList.length;
+      var it = lbList[lbIndex];
+      lbImg.classList.add('is-loading');
+      lbImg.onload = function () { lbImg.classList.remove('is-loading'); };
+      lbImg.src = it.src; lbImg.alt = it.alt;
+      lbCap.textContent = it.caption.replace(/&amp;/g, '&');
+      lbCount.textContent = (lbIndex + 1) + ' / ' + lbList.length;
+      // precargar la siguiente
+      if (lbList.length > 1) { var pre = new Image(); pre.src = lbList[(lbIndex + 1) % lbList.length].src; }
+    };
+
+    document.addEventListener('click', function (e) {
+      var el = e.target.closest && e.target.closest('[data-lightbox]');
+      if (!el) return;
+      e.preventDefault();
+      var gallery = el.closest('[data-gallery]');
+      if (gallery) {
+        var visible = $$('.g-item:not(.is-hidden) [data-lightbox]', gallery);
+        lbList = visible.map(itemData);
+        lbIndex = visible.indexOf(el);
+      } else {
+        lbList = [itemData(el)]; lbIndex = 0;
+      }
+      lb.classList.toggle('is-single', lbList.length < 2);
+      showAt(lbIndex);
+      openDialog(lb);
     });
+
+    $('[data-lb-prev]', lb).addEventListener('click', function () { showAt(lbIndex - 1); });
+    $('[data-lb-next]', lb).addEventListener('click', function () { showAt(lbIndex + 1); });
+    lb.addEventListener('keydown', function (e) {
+      if (lbList.length < 2) return;
+      if (e.key === 'ArrowRight') showAt(lbIndex + 1);
+      if (e.key === 'ArrowLeft') showAt(lbIndex - 1);
+    });
+    // Deslizar con el dedo
+    var tx = null;
+    lb.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; }, { passive: true });
+    lb.addEventListener('touchend', function (e) {
+      if (tx === null || lbList.length < 2) return;
+      var dx = e.changedTouches[0].clientX - tx; tx = null;
+      if (Math.abs(dx) > 50) showAt(lbIndex + (dx < 0 ? 1 : -1));
+    }, { passive: true });
     lb.addEventListener('close', function () { lbImg.removeAttribute('src'); });
+    // Clic en el fondo (fuera de la imagen) cierra
+    lb.addEventListener('click', function (e) { if (e.target === lb || e.target.classList.contains('lb-figure')) closeDialog(lb); });
   }
 
-  /* ---------- Carrusel de la galería ---------- */
-  $$('[data-scroll-prev], [data-scroll-next]').forEach(function (btn) {
-    var target = document.getElementById(btn.getAttribute('data-scroll-prev') || btn.getAttribute('data-scroll-next'));
-    if (!target) return;
-    var dir = btn.hasAttribute('data-scroll-next') ? 1 : -1;
-    btn.addEventListener('click', function () {
-      var item = target.querySelector('li');
-      var step = item ? item.getBoundingClientRect().width + 18 : 300;
-      target.scrollBy({ left: dir * step, behavior: reduceMotion ? 'auto' : 'smooth' });
+  /* ---------- Filtros de la galería ---------- */
+  var filterWrap = $('[data-filters]');
+  var bento = $('[data-gallery]');
+  if (filterWrap && bento) {
+    var chips = $$('[data-filter]', filterWrap);
+    chips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var f = chip.getAttribute('data-filter');
+        chips.forEach(function (c) { c.setAttribute('aria-pressed', String(c === chip)); });
+        $$('.g-item', bento).forEach(function (it) {
+          var show = f === 'todas' || it.getAttribute('data-cat') === f;
+          it.classList.toggle('is-hidden', !show);
+          it.classList.remove('is-entering');
+          if (show && !reduceMotion) { void it.offsetWidth; it.classList.add('is-entering'); }
+        });
+        track('galeria_filtro', { filtro: f });
+      });
     });
+  }
+
+  /* ---------- Masterplan interactivo ---------- */
+  $$('[data-masterplan]').forEach(function (mp) {
+    var pins = $$('[data-pin]', mp);
+    var cImg = $('[data-pin-img]', mp), cTitle = $('[data-pin-title]', mp), cText = $('[data-pin-text]', mp);
+    var auto = null, idx = -1;
+    var select = function (i, fromUser) {
+      idx = i;
+      var pin = pins[i];
+      pins.forEach(function (p) { p.setAttribute('aria-expanded', String(p === pin)); });
+      cImg.classList.add('is-loading');
+      cImg.onload = function () { cImg.classList.remove('is-loading'); };
+      cImg.src = pin.getAttribute('data-img');
+      cImg.alt = pin.getAttribute('data-alt');
+      cTitle.textContent = pin.getAttribute('data-title');
+      cText.textContent = pin.getAttribute('data-text');
+      if (fromUser) {
+        if (auto) { clearInterval(auto); auto = null; }
+        track('masterplan_punto', { punto: pin.getAttribute('data-title') });
+      }
+    };
+    pins.forEach(function (pin, i) { pin.addEventListener('click', function () { select(i, true); }); });
+    // Recorre los puntos solo mientras el mapa está a la vista, hasta que el visitante toque uno
+    if ('IntersectionObserver' in window && !reduceMotion) {
+      new IntersectionObserver(function (en) {
+        if (en[0].isIntersecting) {
+          if (idx === -1) select(0, false);
+          if (!auto && idx !== -2) auto = setInterval(function () { select((idx + 1) % pins.length, false); }, 4500);
+        } else if (auto) { clearInterval(auto); auto = null; }
+      }, { threshold: 0.4 }).observe(mp);
+      mp.addEventListener('pointerdown', function () { if (auto) { clearInterval(auto); auto = null; } idx = idx < 0 ? 0 : idx; }, { passive: true });
+    }
   });
+
+  /* ---------- Contadores animados ---------- */
+  var counters = $$('[data-count]');
+  if (counters.length && 'IntersectionObserver' in window && !reduceMotion) {
+    var fmt = function (n) { return n.toLocaleString('es-MX'); };
+    var cio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        cio.unobserve(en.target);
+        var el = en.target, end = +el.getAttribute('data-count');
+        var pre = el.getAttribute('data-prefix') || '', suf = el.getAttribute('data-suffix') || '';
+        var t0 = null, dur = 1400;
+        var tick = function (t) {
+          if (!t0) t0 = t;
+          var k = Math.min((t - t0) / dur, 1);
+          var eased = 1 - Math.pow(1 - k, 3);
+          el.textContent = pre + fmt(Math.round(end * eased)) + suf;
+          if (k < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      });
+    }, { threshold: 0.6 });
+    counters.forEach(function (el) { cio.observe(el); });
+  }
+
+  /* ---------- Parallax suave ---------- */
+  var parallax = $$('[data-parallax]');
+  if (parallax.length && !reduceMotion) {
+    var ticking = false;
+    var update = function () {
+      ticking = false;
+      parallax.forEach(function (img) {
+        var r = img.parentNode.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > innerHeight) return;
+        var progress = (r.top + r.height / 2 - innerHeight / 2) / (innerHeight + r.height);
+        img.style.transform = 'translate3d(0,' + (progress * -22).toFixed(2) + '%,0)';
+      });
+    };
+    window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+    update();
+  }
 
   /* ---------- YouTube ligero (carga el reproductor sólo al dar clic) ---------- */
   $$('[data-youtube]').forEach(function (box) {
