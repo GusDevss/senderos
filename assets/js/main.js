@@ -129,7 +129,7 @@
     var start = function () { if (!raf && !userTouched && !reduceMotion) { last = 0; raf = requestAnimationFrame(step); } };
 
     // Empieza centrada en la alberca/casa club
-    var center = function () { vp.scrollLeft = (vp.scrollWidth - vp.clientWidth) * 0.3; };
+    var center = function () { vp.scrollLeft = (vp.scrollWidth - vp.clientWidth) * 0.3; var r = $('[data-pano-range]', pano); if (r) r.value = '300'; };
     if (img.complete) center(); else img.addEventListener('load', center, { once: true });
 
     if ('IntersectionObserver' in window) {
@@ -152,6 +152,22 @@
       vp.scrollLeft = startLeft - (e.pageX - startX);
     });
     window.addEventListener('mouseup', function () { down = false; vp.classList.remove('is-dragging'); });
+
+    // Barra deslizante y flechas
+    var range = $('[data-pano-range]', pano);
+    var maxScroll = function () { return Math.max(1, vp.scrollWidth - vp.clientWidth); };
+    var syncRange = function () { if (range) range.value = String(Math.round(vp.scrollLeft / maxScroll() * 1000)); };
+    vp.addEventListener('scroll', syncRange, { passive: true });
+    if (range) {
+      range.addEventListener('input', function () { stop(); vp.scrollLeft = (+range.value / 1000) * maxScroll(); });
+    }
+    var nudge = function (d) {
+      stop();
+      vp.scrollBy({ left: d * vp.clientWidth * 0.45, behavior: reduceMotion ? 'auto' : 'smooth' });
+    };
+    var prevB = $('[data-pano-prev]', pano), nextB = $('[data-pano-next]', pano);
+    if (prevB) prevB.addEventListener('click', function () { nudge(-1); });
+    if (nextB) nextB.addEventListener('click', function () { nudge(1); });
   });
 
   /* ---------- Utilidades para <dialog> ---------- */
@@ -316,23 +332,79 @@
     lb.addEventListener('click', function (e) { if (e.target === lb || e.target.classList.contains('lb-figure')) closeDialog(lb); });
   }
 
-  /* ---------- Filtros de la galería ---------- */
+  /* ---------- Galería: filtros y "ver todas" ---------- */
   var filterWrap = $('[data-filters]');
   var bento = $('[data-gallery]');
   if (filterWrap && bento) {
     var chips = $$('[data-filter]', filterWrap);
+    var moreBtn = $('[data-gallery-more]');
+    var moreLabel = moreBtn ? $('[data-more-label]', moreBtn) : null;
+    var expanded = false, currentFilter = 'todas';
+    var limit = function () {
+      return window.matchMedia('(max-width: 600px)').matches
+        ? +(bento.getAttribute('data-limit-mobile') || 4)
+        : +(bento.getAttribute('data-limit') || 6);
+    };
+    var render = function (animate) {
+      var n = 0, total = 0;
+      $$('.g-item', bento).forEach(function (it) {
+        var match = currentFilter === 'todas' || it.getAttribute('data-cat') === currentFilter;
+        it.classList.toggle('is-hidden', !match);
+        if (match) total++;
+        var collapsed = match && !expanded && n >= limit();
+        if (match) n++;
+        it.classList.toggle('is-collapsed', collapsed);
+        it.classList.remove('is-entering');
+        if (animate && match && !collapsed && !reduceMotion) { void it.offsetWidth; it.classList.add('is-entering'); }
+      });
+      if (moreBtn) {
+        moreBtn.parentNode.hidden = total <= limit();
+        moreBtn.setAttribute('aria-expanded', String(expanded));
+        moreLabel.textContent = expanded ? 'Ver menos fotos' : 'Ver todas las fotos (' + total + ')';
+      }
+    };
     chips.forEach(function (chip) {
       chip.addEventListener('click', function () {
-        var f = chip.getAttribute('data-filter');
+        currentFilter = chip.getAttribute('data-filter');
         chips.forEach(function (c) { c.setAttribute('aria-pressed', String(c === chip)); });
-        $$('.g-item', bento).forEach(function (it) {
-          var show = f === 'todas' || it.getAttribute('data-cat') === f;
-          it.classList.toggle('is-hidden', !show);
-          it.classList.remove('is-entering');
-          if (show && !reduceMotion) { void it.offsetWidth; it.classList.add('is-entering'); }
-        });
-        track('galeria_filtro', { filtro: f });
+        expanded = false;
+        bento.classList.toggle('is-filtered', currentFilter !== 'todas');
+        render(true);
+        track('galeria_filtro', { filtro: currentFilter });
       });
+    });
+    if (moreBtn) {
+      moreBtn.addEventListener('click', function () {
+        expanded = !expanded;
+        render(expanded);
+        if (!expanded) document.getElementById('galeria').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
+      });
+    }
+    var lastMobile = window.matchMedia('(max-width: 600px)').matches;
+    window.addEventListener('resize', function () {
+      var m = window.matchMedia('(max-width: 600px)').matches;
+      if (m !== lastMobile) { lastMobile = m; render(false); }
+    });
+    render(false);
+  }
+
+  /* ---------- Preguntas frecuentes: solo una abierta a la vez ---------- */
+  var faqs = $$('.faq details');
+  faqs.forEach(function (d) {
+    d.addEventListener('toggle', function () {
+      if (d.open) faqs.forEach(function (o) { if (o !== d && o.open) o.open = false; });
+    });
+  });
+
+  /* ---------- Botón para volver al inicio ---------- */
+  var toTop = $('[data-to-top]');
+  if (toTop) {
+    var onTop = function () { toTop.classList.toggle('is-visible', window.scrollY > window.innerHeight * 0.8); };
+    window.addEventListener('scroll', onTop, { passive: true });
+    onTop();
+    toTop.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
     });
   }
 
@@ -437,6 +509,7 @@
       var wrap = mapBtn.parentNode;
       wrap.innerHTML = '';
       wrap.appendChild(iframe);
+      wrap.classList.add('is-loaded');
     });
   }
 
@@ -490,7 +563,8 @@
 
       var d = new FormData(form);
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Enviando…';
+      var submitLabel = $('[data-submit-label]', submitBtn) || submitBtn;
+      submitLabel.textContent = 'Enviando…';
       status.textContent = '';
 
       fetch(form.action, { method: 'POST', body: d, headers: { Accept: 'application/json' } })
@@ -510,7 +584,7 @@
         })
         .then(function () {
           submitBtn.disabled = false;
-          submitBtn.textContent = 'Enviar solicitud';
+          submitLabel.textContent = 'Enviar solicitud';
         });
     });
   }
