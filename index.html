@@ -159,6 +159,7 @@
         <ul>
           <li><a href="#desarrollo">El desarrollo</a></li>
           <li><a href="#amenidades">Amenidades</a></li>
+          <li><a href="#casa-club">Casa club</a></li>
           <li><a href="#privadas">Privadas</a></li>
           <li><a href="#recorrido-virtual">Recorrido virtual</a></li>
           <li><a href="#contacto">Contacto</a></li>
@@ -313,6 +314,44 @@
         <li><button type="button" data-lightbox="assets/img/amenidad-banos-con-vestidores.webp"><img src="assets/img/amenidad-banos-con-vestidores.webp" alt="Baños con vestidores" width="400" height="267" loading="lazy"><span>Baños con vestidores</span></button></li>
         <li><button type="button" data-lightbox="assets/img/drone-acceso.webp"><img src="assets/img/drone-acceso.webp" alt="Acceso principal controlado de Los Senderos Residencial" width="1600" height="900" loading="lazy"><span>Acceso principal</span></button></li>
       </ul>
+    </section>
+
+    <!-- ============ CASA CLUB (video vertical + panorámica) ============ -->
+    <section class="section clubhouse" id="casa-club" aria-labelledby="casa-club-title">
+      <div class="container split">
+        <div class="split-text reveal">
+          <p class="eyebrow">Casa club</p>
+          <h2 id="casa-club-title">Recorre la casa club</h2>
+          <p class="lead">Jardines, palmeras y andadores de piedra que te llevan de la alberca a la cancha de pádel.</p>
+          <p>La casa club es el corazón de Los Senderos Residencial: alberca tipo resort con chapoteadero, asoleadero, cancha de pádel, gimnasio, terraza fitness y amplias áreas verdes para disfrutar en familia, a unos pasos de tu terreno.</p>
+          <ul class="club-list">
+            <li>Alberca tipo resort y chapoteadero</li>
+            <li>Cancha de pádel con iluminación</li>
+            <li>Jardines con andadores y vegetación endémica</li>
+          </ul>
+          <div class="split-actions">
+            <a class="btn btn--green" href="#contacto">Agenda tu visita</a>
+            <button class="btn btn--link" type="button" data-open-promos>Ver promociones →</button>
+          </div>
+        </div>
+        <figure class="phone-frame reveal">
+          <video class="lazy-video" muted loop playsinline preload="none"
+                 poster="assets/img/recorrido-casa-club-poster.webp"
+                 data-src="assets/video/recorrido-casa-club.mp4"
+                 aria-label="Recorrido a pie por los jardines de la casa club hasta la cancha de pádel" width="540" height="960"></video>
+          <figcaption>Recorrido real por la casa club</figcaption>
+        </figure>
+      </div>
+
+      <figure class="pano reveal" data-pano>
+        <div class="pano-viewport" tabindex="0" role="region" aria-label="Fotografía panorámica de la casa club. Desliza para recorrerla.">
+          <picture>
+            <source media="(max-width: 767px)" srcset="assets/img/panoramica-casa-club-movil.webp">
+            <img src="assets/img/panoramica-casa-club.webp" alt="Panorámica de la casa club de Los Senderos Residencial: alberca tipo resort, casa club, jardines y cancha de pádel en Querétaro" width="4582" height="1000" loading="lazy" draggable="false">
+          </picture>
+        </div>
+        <figcaption class="pano-hint"><span aria-hidden="true">↔</span> Desliza para recorrer la panorámica</figcaption>
+      </figure>
     </section>
 
     <!-- ============ RECORRIDO VIRTUAL ============ -->
@@ -581,6 +620,7 @@
       <nav class="footer-nav" aria-label="Pie de página">
         <ul>
           <li><a href="#amenidades">Amenidades</a></li>
+          <li><a href="#casa-club">Casa club</a></li>
           <li><a href="#privadas">Privadas</a></li>
           <li><a href="#recorrido-virtual">Recorrido virtual</a></li>
           <li><a href="aviso-de-privacidad.html">Aviso de privacidad</a></li>

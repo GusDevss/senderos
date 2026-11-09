@@ -609,3 +609,56 @@ body.dialog-open { overflow: hidden; }
 .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .contact-form { position: relative; }
 .contact-form button[disabled] { opacity: .7; cursor: progress; transform: none; }
+
+/* ---------- Casa club ---------- */
+.clubhouse { background: var(--cream-100); overflow: hidden; }
+.clubhouse .split { grid-template-columns: 1.15fr .85fr; }
+.club-list { list-style: none; padding: 0; display: grid; gap: 8px; margin: 1.2rem 0 0; }
+.club-list li { display: flex; gap: .7em; align-items: flex-start; font-weight: 500; }
+.club-list li::before {
+  content: ""; width: 22px; height: 22px; flex-shrink: 0; margin-top: 2px; border-radius: 50%;
+  background: var(--gold-500) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%231f3614' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='m6 12 4 4 8-8'/%3E%3C/svg%3E") center / 14px no-repeat;
+}
+.phone-frame {
+  margin: 0 auto; width: min(100%, 330px); position: relative;
+  padding: 10px; border-radius: 38px; background: var(--green-900);
+  box-shadow: var(--shadow), inset 0 0 0 2px rgb(255 255 255 / .08);
+}
+.phone-frame::before {
+  content: ""; position: absolute; top: 18px; left: 50%; translate: -50% 0; z-index: 1;
+  width: 70px; height: 20px; border-radius: 999px; background: var(--green-900);
+}
+.phone-frame video { width: 100%; aspect-ratio: 9 / 16; object-fit: cover; border-radius: 29px; background: var(--green-800); }
+.phone-frame figcaption {
+  position: absolute; left: 50%; bottom: -16px; translate: -50% 0; white-space: nowrap;
+  background: var(--gold-500); color: var(--green-900); font-size: .78rem; font-weight: 600;
+  padding: .45em 1em; border-radius: 999px; box-shadow: var(--shadow-sm);
+}
+@media (max-width: 860px) {
+  .clubhouse .split { grid-template-columns: 1fr; }
+  .phone-frame { width: min(78%, 300px); }
+}
+
+.pano { margin: clamp(56px, 8vw, 96px) 0 0; position: relative; }
+.pano-viewport {
+  overflow-x: auto; overflow-y: hidden; cursor: grab; scrollbar-width: none;
+  overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch;
+}
+.pano-viewport::-webkit-scrollbar { display: none; }
+.pano-viewport.is-dragging { cursor: grabbing; }
+.pano-viewport img {
+  height: clamp(260px, 38vw, 560px); width: auto; max-width: none; user-select: none; -webkit-user-drag: none;
+}
+.pano::before, .pano::after {
+  content: ""; position: absolute; top: 0; bottom: 0; width: clamp(24px, 6vw, 90px); z-index: 1; pointer-events: none;
+}
+.pano::before { left: 0; background: linear-gradient(to right, var(--cream-100), transparent); }
+.pano::after { right: 0; background: linear-gradient(to left, var(--cream-100), transparent); }
+.pano-hint {
+  position: absolute; left: 50%; bottom: 18px; translate: -50% 0; z-index: 2; pointer-events: none;
+  background: rgb(31 54 20 / .78); color: #fff; font-size: .8rem; font-weight: 500;
+  padding: .5em 1.1em; border-radius: 999px; backdrop-filter: blur(6px); white-space: nowrap;
+  transition: opacity .5s;
+}
+.pano-hint span { color: var(--gold-300); margin-right: .3em; }
+.pano.is-touched .pano-hint { opacity: 0; }

@@ -106,6 +106,54 @@
     reveals.forEach(function (el) { el.classList.add('is-visible'); });
   }
 
+  /* ---------- Panorámica: auto-recorrido suave + arrastre con el mouse ---------- */
+  $$('[data-pano]').forEach(function (pano) {
+    var vp = $('.pano-viewport', pano);
+    var img = $('img', vp);
+    var userTouched = false, inView = false, dir = 1, raf = null, last = 0, pos = null;
+
+    var stop = function () { userTouched = true; pano.classList.add('is-touched'); if (raf) cancelAnimationFrame(raf); raf = null; };
+    var step = function (t) {
+      raf = null;
+      if (userTouched || !inView) return;
+      var dt = last ? Math.min(t - last, 50) : 16; last = t;
+      var max = vp.scrollWidth - vp.clientWidth;
+      if (max > 0) {
+        if (pos === null || Math.abs(pos - vp.scrollLeft) > 2) pos = vp.scrollLeft;
+        pos += dir * dt * 0.04; // ~40 px por segundo
+        if (pos >= max) { pos = max; dir = -1; } else if (pos <= 0) { pos = 0; dir = 1; }
+        vp.scrollLeft = pos;
+      }
+      raf = requestAnimationFrame(step);
+    };
+    var start = function () { if (!raf && !userTouched && !reduceMotion) { last = 0; raf = requestAnimationFrame(step); } };
+
+    // Empieza centrada en la alberca/casa club
+    var center = function () { vp.scrollLeft = (vp.scrollWidth - vp.clientWidth) * 0.3; };
+    if (img.complete) center(); else img.addEventListener('load', center, { once: true });
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (en) {
+        inView = en[0].isIntersecting;
+        if (inView) start();
+      }, { threshold: 0.3 }).observe(vp);
+    }
+
+    ['touchstart', 'wheel', 'keydown'].forEach(function (ev) { vp.addEventListener(ev, stop, { passive: true }); });
+
+    // Arrastrar con el mouse en escritorio
+    var down = false, startX = 0, startLeft = 0;
+    vp.addEventListener('mousedown', function (e) {
+      stop(); down = true; startX = e.pageX; startLeft = vp.scrollLeft; vp.classList.add('is-dragging');
+    });
+    window.addEventListener('mousemove', function (e) {
+      if (!down) return;
+      e.preventDefault();
+      vp.scrollLeft = startLeft - (e.pageX - startX);
+    });
+    window.addEventListener('mouseup', function () { down = false; vp.classList.remove('is-dragging'); });
+  });
+
   /* ---------- Utilidades para <dialog> ---------- */
   function openDialog(d) {
     if (!d || d.open) return;
