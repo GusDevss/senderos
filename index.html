@@ -35,10 +35,10 @@
   <!-- Rendimiento -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="image" href="assets/img/portada-poster-movil.webp" media="(max-width: 899px)" fetchpriority="high">
-  <link rel="preload" as="image" href="assets/img/portada-poster.webp" media="(min-width: 900px)" fetchpriority="high">
+  <link rel="preload" as="image" href="assets/img/portada-poster-movil.webp" media="(max-width: 767px)" fetchpriority="high">
+  <link rel="preload" as="image" href="assets/img/portada-poster.webp" media="(min-width: 768px)" fetchpriority="high">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Poppins:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="assets/css/styles.css?v=f1253419">
+  <link rel="stylesheet" href="assets/css/styles.css?v=2473b156">
 
   <!-- Datos estructurados (schema.org) -->
   <script type="application/ld+json">
@@ -180,29 +180,29 @@
 
   <main id="contenido">
 
-    <!-- ============ PORTADA ============ -->
-    <section class="hero hero--v2" aria-labelledby="hero-title">
-      <div class="hero-bg" aria-hidden="true">
-        <img class="hero-ondas" src="assets/img/ondas.webp" alt="" width="600" height="666">
+    <!-- ============ PORTADA (video dentro de las letras) ============ -->
+    <section class="hero hero--c" aria-labelledby="hero-title">
+      <div class="hc-word" aria-hidden="true">
+        <picture>
+          <source media="(max-width: 767px)" srcset="assets/img/portada-poster-movil.webp">
+          <img class="hero-poster" src="assets/img/portada-poster.webp" alt="" width="1600" height="900" fetchpriority="high">
+        </picture>
+        <video class="hero-video" muted loop playsinline preload="none" disablepictureinpicture
+               data-hero-video
+               data-src-sm="assets/video/portada-854.mp4"
+               data-src-lg="assets/video/portada-1280.mp4"></video>
+        <div class="hc-mask"><span>Senderos</span></div>
       </div>
 
-      <div class="container hero-grid">
+      <div class="container hc-under">
         <div class="hero-content">
           <button class="hero-announce" type="button" data-open-promos>
             <span class="hero-announce-tag">Buen Fin</span>
             <span>Descuentos desde $50,000<span class="hide-sm"> · 13 al 17 de noviembre</span></span>
-            <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+            <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
           </button>
-
           <h1 id="hero-title">Terrenos en venta en <em>Querétaro</em></h1>
-          <p class="hero-lead">Tu nuevo estilo de vida en Los Senderos Residencial: naturaleza, más de 25 amenidades y plusvalía, a sólo 3 km del centro.</p>
-
-          <ul class="hero-chips">
-            <li><strong>3 km</strong><span>del Centro de Querétaro</span></li>
-            <li><strong>+25</strong><span>amenidades en familia</span></li>
-            <li><strong>$1.1 MDP</strong><span>precio desde</span></li>
-          </ul>
-
+          <p class="hc-lead">Un desarrollo ecológico y residencial con casa club, sendero deportivo y más de 25 amenidades, a sólo 3 km del Centro de Querétaro.</p>
           <div class="hero-actions">
             <button class="btn btn--gold btn--lg" type="button" data-open-promos>
               <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M21.4 11.6 12.4 2.6A2 2 0 0 0 11 2H4a2 2 0 0 0-2 2v7c0 .6.2 1 .6 1.4l9 9a2 2 0 0 0 2.8 0l7-7a2 2 0 0 0 0-2.8zM6.5 8a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>
@@ -214,35 +214,16 @@
           </div>
         </div>
 
-        <div class="hero-visual" aria-hidden="true">
-          <div class="hero-arch">
-            <picture>
-              <source media="(max-width: 899px)" srcset="assets/img/portada-poster-movil.webp">
-              <img class="hero-poster" src="assets/img/portada-poster.webp" alt="" width="1600" height="900" fetchpriority="high">
-            </picture>
-            <video class="hero-video" muted loop playsinline preload="none" disablepictureinpicture
-                   data-hero-video
-                   data-src-sm="assets/video/portada-854.mp4"
-                   data-src-lg="assets/video/portada-1280.mp4"></video>
-          </div>
-
-          <svg class="hero-seal" viewBox="0 0 200 200" width="132" height="132">
-            <defs><path id="sealPath" d="M100,100 m-74,0 a74,74 0 1,1 148,0 a74,74 0 1,1 -148,0"/></defs>
-            <circle cx="100" cy="100" r="98" fill="#b1ad61"/>
-            <g class="hero-seal-ring"><text font-size="16" font-weight="600" fill="#1f3614" font-family="Poppins, sans-serif"><textPath href="#sealPath" textLength="462" lengthAdjust="spacing">PLUSVALÍA MAYOR AL 15% • LOS SENDEROS •</textPath></text></g>
-            <text class="hero-seal-num" x="100" y="112" text-anchor="middle" font-size="38" font-weight="600" fill="#1f3614" font-family="Cormorant Garamond, serif">+15%</text>
-          </svg>
-
-          <div class="hero-float hero-float--top">
-            <span class="hero-float-icon">
-              <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
-            </span>
-            <span><small>Ubicación</small>Av. Tlacote, Querétaro</span>
-          </div>
-          <div class="hero-float hero-float--bottom">
-            <span class="hero-dots"><i></i><i></i><i></i></span>
-            <span><small>3 privadas</small>Marquesa · Santiago · Antigua</span>
-          </div>
+        <div class="hc-side">
+          <ul class="hc-row">
+            <li><strong>3 km</strong><span>del Centro</span></li>
+            <li><strong>+25</strong><span>amenidades</span></li>
+            <li><strong>+15%</strong><span>de plusvalía</span></li>
+          </ul>
+          <a class="hc-price" href="#privadas">
+            <span><small>Terrenos desde</small><b>$1.1 MDP</b><em>La Marquesa · Santiago · Antigua</em></span>
+            <span class="hc-go"><svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </a>
         </div>
       </div>
 
