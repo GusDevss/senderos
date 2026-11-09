@@ -51,6 +51,14 @@ ErrorDocument 410 /404.html
   ExpiresByType video/mp4 "access plus 6 months"
 </IfModule>
 
+# El HTML siempre se revisa con el servidor; CSS y JS llevan ?v=... en su URL,
+# así que cada versión nueva se descarga aunque el navegador tenga la anterior.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|php)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
 AddType image/webp .webp
 AddType video/mp4 .mp4
 AddType application/manifest+json .webmanifest

@@ -37,6 +37,16 @@ sesión; el botón "Accede a promociones" siempre lo abre.
 **Google Tag Manager:** `GTM_ID` en `main.js`. Eventos enviados al `dataLayer`:
 `promociones_abiertas`, `clic_whatsapp`, `clic_telefono`, `formulario_contacto`, `video_recorrido`.
 
+## Caché del navegador
+
+`styles.css` y `main.js` se cargan con `?v=...` en la URL (ver `index.html`,
+`aviso-de-privacidad.html` y `404.html`). Si los modificas, cambia ese valor
+para que los visitantes descarguen la versión nueva:
+
+```bash
+sed -i -E "s#styles\.css\?v=[a-z0-9]+#styles.css?v=$(md5sum assets/css/styles.css | cut -c1-8)#; s#main\.js\?v=[a-z0-9]+#main.js?v=$(md5sum assets/js/main.js | cut -c1-8)#" index.html aviso-de-privacidad.html 404.html
+```
+
 ## Publicar en Hostinger
 
 1. En hPanel → **Correos**, crea el buzón remitente (p. ej. `no-reply@lossenderosresidencial.com.mx`)
