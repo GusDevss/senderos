@@ -38,7 +38,7 @@
   <link rel="preload" as="image" href="assets/img/portada-poster-movil.webp" media="(max-width: 767px)" fetchpriority="high">
   <link rel="preload" as="image" href="assets/img/portada-poster.webp" media="(min-width: 768px)" fetchpriority="high">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Poppins:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="assets/css/styles.css?v=a006576f">
+  <link rel="stylesheet" href="assets/css/styles.css?v=020d94d4">
 
   <!-- Datos estructurados (schema.org) -->
   <script type="application/ld+json">
@@ -529,13 +529,13 @@
 
     <!-- ============ COTIZADOR ============
          Precios de lista sin descuentos ni promociones (listas del 27 de octubre de 2026).
-         Para actualizar precios o condiciones, edita el JSON "cotizador-datos" de abajo. -->
+         Para actualizar precios, tasas o condiciones, edita el JSON "cotizador-datos" de abajo. -->
     <section class="section quote" id="cotizador" aria-labelledby="cotizador-title">
       <div class="container">
         <header class="section-head reveal">
           <p class="eyebrow">Cotizador</p>
           <h2 id="cotizador-title">Cotiza tu terreno en segundos</h2>
-          <p>Elige la privada y la forma de pago para ver el precio de lista de un lote tipo de 8 × 18 m.</p>
+          <p>Elige la privada y la forma de pago. En La Marquesa puedes simular el crédito directo a 10 años con tu propio enganche.</p>
         </header>
 
         <div class="quote-shell reveal" data-quote>
@@ -561,26 +561,46 @@
             <fieldset class="quote-step">
               <legend><span class="step-n">2</span> Forma de pago</legend>
               <div class="quote-options quote-options--2">
-                <label class="q-opt">
-                  <input type="radio" name="q-plan" value="contado" checked>
-                  <span class="q-card q-card--plan"><b>Contado</b><small>Apartado y saldo en una sola exhibición</small></span>
+                <label class="q-opt" data-plan-for="credito10">
+                  <input type="radio" name="q-plan" value="credito10" checked>
+                  <span class="q-card q-card--plan"><b>Crédito directo a 10 años</b><small>120 mensualidades · sin buró y sin aval</small></span>
                 </label>
                 <label class="q-opt">
+                  <input type="radio" name="q-plan" value="contado">
+                  <span class="q-card q-card--plan"><b>Contado</b><small>Apartado y saldo en una sola exhibición</small></span>
+                </label>
+                <label class="q-opt" data-plan-for="12" hidden>
                   <input type="radio" name="q-plan" value="12">
                   <span class="q-card q-card--plan"><b>Crédito a 12 meses</b><small>Apartado y saldo en 12 mensualidades</small></span>
                 </label>
               </div>
             </fieldset>
 
+            <div class="quote-step credit-fields" data-credit-fields>
+              <p class="quote-lot-title"><span class="step-n">3</span> ¿Cuánto quieres dar de enganche?</p>
+              <div class="money-input">
+                <span>$</span>
+                <input id="q-enganche" type="text" inputmode="numeric" autocomplete="off" aria-describedby="q-enganche-note q-enganche-error" data-q-enganche>
+                <span>MXN</span>
+              </div>
+              <p class="q-error" id="q-enganche-error" role="alert" data-q-error hidden></p>
+              <div class="q-presets" data-q-presets></div>
+              <p class="q-note" id="q-enganche-note" data-q-enganche-note></p>
+              <ul class="q-terms">
+                <li><b>10 años</b><span>120 mensualidades</span></li>
+                <li><b>12% anual</b><span>1% mensual</span></li>
+                <li><b>$10,000</b><span>apertura, pago único</span></li>
+              </ul>
+              <ul class="q-badges"><li>Sin revisión de buró</li><li>Sin aval</li></ul>
+            </div>
+
             <div class="quote-step quote-lot">
-              <p class="quote-lot-title"><span class="step-n">3</span> Lote tipo</p>
+              <p class="quote-lot-title"><span class="step-n" data-lot-step>4</span> Lote tipo</p>
               <div class="lot-box">
-                <svg class="lot-svg" viewBox="0 0 120 200" width="72" height="120" aria-hidden="true">
+                <svg class="lot-svg" viewBox="0 0 120 200" width="60" height="100" aria-hidden="true">
                   <rect x="22" y="12" width="76" height="170" rx="4" fill="#efe9d6" stroke="#3c6328" stroke-width="3"/>
-                  <line x1="22" y1="194" x2="98" y2="194" stroke="#b1ad61" stroke-width="2"/>
-                  <text x="60" y="191" text-anchor="middle" font-size="13" font-weight="600" fill="#3c6328" font-family="Poppins, sans-serif" dy="-4">8 m</text>
-                  <line x1="108" y1="12" x2="108" y2="182" stroke="#b1ad61" stroke-width="2"/>
-                  <text x="114" y="100" font-size="13" font-weight="600" fill="#3c6328" font-family="Poppins, sans-serif" transform="rotate(90 114 100)" text-anchor="middle">18 m</text>
+                  <text x="60" y="105" text-anchor="middle" font-size="22" font-weight="600" fill="#3c6328" font-family="Poppins, sans-serif">144</text>
+                  <text x="60" y="125" text-anchor="middle" font-size="14" fill="#3c6328" font-family="Poppins, sans-serif">m²</text>
                 </svg>
                 <div>
                   <b>8 m de frente × 18 m de fondo</b>
@@ -590,31 +610,55 @@
             </div>
           </div>
 
-          <div class="quote-result" aria-live="polite">
-            <p class="quote-kicker"><span data-q-name>La Marquesa Privada Club</span> · <span data-q-plan-name>Contado</span></p>
-            <p class="quote-label">Precio de lista</p>
-            <p class="quote-price" data-q-price>$1,107,144</p>
-            <p class="quote-m2"><span data-q-m2>$7,688</span> por m² · lote de 144 m²</p>
+          <div class="quote-result" aria-live="polite" data-q-result>
+            <p class="quote-kicker"><span data-q-name>La Marquesa Privada Club</span> · <span data-q-plan-name>Crédito directo a 10 años</span></p>
+            <p class="quote-label" data-q-hero-label>Tu mensualidad estimada</p>
+            <p class="quote-price" data-q-hero>$0</p>
+            <p class="quote-m2" data-q-hero-sub></p>
 
-            <dl class="quote-lines">
-              <div><dt>Apartado</dt><dd data-q-apartado>$30,000</dd></div>
-              <div data-q-row-saldo><dt data-q-saldo-label>Saldo en una sola exhibición</dt><dd data-q-saldo>$1,077,144</dd></div>
-              <div class="quote-monthly" data-q-row-mensual hidden><dt>12 mensualidades de</dt><dd data-q-mensual>$0</dd></div>
-              <div class="quote-total"><dt>Total</dt><dd data-q-total>$1,107,144</dd></div>
-            </dl>
+            <dl class="quote-lines" data-q-lines></dl>
+            <p class="q-bridge" data-q-bridge hidden></p>
 
             <div class="quote-actions">
-              <a class="btn btn--wa btn--block btn--lg" href="#" target="_blank" rel="noopener" data-q-whatsapp>
-                <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.3-.5 0-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.1.1.7-.1 1.3z"/></svg>
-                Enviar mi cotización por WhatsApp
-              </a>
+              <a class="btn btn--wa btn--block btn--lg" href="#" target="_blank" rel="noopener" data-q-whatsapp><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.3-.5 0-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.1.1.7-.1 1.3z"/></svg> Enviar mi cotización por WhatsApp</a>
               <p class="quote-wa-hint">Un asesor te responde con disponibilidad y descuentos vigentes.</p>
-              <button class="btn btn--outline-light btn--block" type="button" data-q-print>Imprimir o guardar en PDF</button>
+              <div class="quote-actions-row">
+                <button class="btn btn--outline-light" type="button" data-q-pdf><svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m-5-5 5 5 5-5M4 15v6h16v-6"/></svg> Descargar PDF</button>
+                <a class="btn btn--outline-light" href="#amortizacion" data-q-amort-link><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="none" stroke="currentColor" stroke-width="2" d="M3 3h18v18H3zM3 9h18M3 15h18M9 9v12"/></svg> Tabla de pagos</a>
+              </div>
             </div>
-            <p class="quote-note">Precios de lista al 27 de octubre de 2026, sin descuentos ni promociones. Sujetos a cambio y disponibilidad. Un asesor te confirmará el precio final y los descuentos vigentes.</p>
-            <p class="quote-print-meta" data-q-date></p>
+            <p class="quote-note" data-q-note></p>
           </div>
         </div>
+
+        <!-- Tabla de amortización (solo crédito directo) -->
+        <details class="amort reveal" id="amortizacion" data-q-amort>
+          <summary>
+            <span class="amort-title"><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="none" stroke="currentColor" stroke-width="2" d="M3 3h18v18H3zM3 9h18M3 15h18M9 9v12"/></svg><span><b>Ver tabla de amortización</b><small>Capital, intereses y saldo de cada uno de los 120 pagos</small></span></span>
+            <span class="amort-plus" aria-hidden="true">+</span>
+          </summary>
+          <div class="amort-body">
+            <div class="amort-stats">
+              <div><span>Saldo financiado</span><b data-q-a-principal></b></div>
+              <div><span>Intereses del crédito</span><b data-q-a-interest></b></div>
+              <div><span>Total con financiamiento y apertura</span><b data-q-a-total></b></div>
+            </div>
+            <div class="amort-toolbar">
+              <p data-q-a-info></p>
+              <div>
+                <button class="btn btn--sm btn--green" type="button" data-q-csv><svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m-5-5 5 5 5-5M4 15v6h16v-6"/></svg> Descargar Excel (CSV)</button>
+                <button class="btn btn--sm btn--gold" type="button" data-q-pdf><svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m-5-5 5 5 5-5M4 15v6h16v-6"/></svg> Descargar PDF</button>
+              </div>
+            </div>
+            <div class="amort-scroll" role="region" aria-label="Tabla de amortización" tabindex="0">
+              <table>
+                <thead><tr><th scope="col">Pago</th><th scope="col">Fecha</th><th scope="col">Saldo inicial</th><th scope="col">Mensualidad</th><th scope="col">Capital</th><th scope="col">Interés</th><th scope="col">Saldo final</th></tr></thead>
+                <tbody data-q-a-body></tbody>
+              </table>
+            </div>
+            <p class="amort-note">El cálculo redondea a centavos en cada periodo y la última mensualidad se ajusta para liquidar el saldo. El total incluye el precio del terreno, los intereses y una sola apertura de crédito.</p>
+          </div>
+        </details>
 
         <script type="application/json" id="cotizador-datos">
         {
@@ -622,13 +666,18 @@
           "lote": { "frente": 8, "fondo": 18, "m2": 144 },
           "fechaLista": "27 de octubre de 2026",
           "privadas": {
-            "marquesa": { "nombre": "La Marquesa Privada Club", "precioLista": 1107144 },
-            "santiago": { "nombre": "Santiago Privada Club", "precioLista": 1341461 },
-            "antigua":  { "nombre": "Antigua Privada Club", "precioLista": 1230000 }
+            "marquesa": { "nombre": "La Marquesa Privada Club", "precioLista": 1107144, "planes": ["credito10", "contado"] },
+            "santiago": { "nombre": "Santiago Privada Club", "precioLista": 1341461, "planes": ["contado", "12"] },
+            "antigua":  { "nombre": "Antigua Privada Club", "precioLista": 1230000, "planes": ["contado", "12"] }
           },
           "planes": {
-            "contado": { "nombre": "Contado", "meses": 0 },
-            "12": { "nombre": "Crédito a 12 meses", "meses": 12 }
+            "contado": { "nombre": "Contado", "tipo": "contado" },
+            "12": { "nombre": "Crédito a 12 meses", "tipo": "meses", "meses": 12 },
+            "credito10": {
+              "nombre": "Crédito directo a 10 años", "tipo": "amortizado",
+              "meses": 120, "tasaAnual": 12, "apertura": 10000,
+              "enganchePct": 10, "pagosEnganche": 6, "descuento": 0
+            }
           }
         }
         </script>
@@ -894,6 +943,6 @@
     <button class="lb-nav lb-next" type="button" data-lb-next aria-label="Imagen siguiente">›</button>
   </dialog>
 
-  <script src="assets/js/main.js?v=4e8c5102" defer></script>
+  <script src="assets/js/main.js?v=3445aa9f" defer></script>
 </body>
 </html>

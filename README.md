@@ -37,6 +37,16 @@ sesión; el botón "Accede a promociones" siempre lo abre.
 **Google Tag Manager:** `GTM_ID` en `main.js`. Eventos enviados al `dataLayer`:
 `promociones_abiertas`, `clic_whatsapp`, `clic_telefono`, `formulario_contacto`, `video_recorrido`.
 
+## Cotizador
+
+Los precios, plazos, tasa, apertura y enganche están en el bloque JSON
+`cotizador-datos` dentro de `index.html`. La Marquesa usa el plan `credito10`
+(crédito directo a 120 meses, 12% anual, apertura de $10,000, enganche sugerido
+del 10% y 6 pagos para completar enganche y apertura). `descuento` está en 0
+para cotizar a precio de lista; con `100000` se reproduce el simulador de
+referencia ($13,004.64 al mes). El PDF se genera con jsPDF
+(`assets/js/vendor/jspdf.umd.min.js`, se carga solo al descargar).
+
 ## Caché del navegador
 
 `styles.css` y `main.js` se cargan con `?v=...` en la URL (ver `index.html`,

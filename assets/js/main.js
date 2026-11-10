@@ -408,64 +408,333 @@
     });
   }
 
-  /* ---------- Cotizador ---------- */
+  /* ---------- Cotizador (incluye crédito directo con tabla de amortización) ---------- */
   var quote = $('[data-quote]');
-  var quoteData = null;
-  try { quoteData = JSON.parse(($('#cotizador-datos') || {}).textContent || 'null'); } catch (e) { quoteData = null; }
-  if (quote && quoteData) {
-    var money = function (n) { return '$' + Math.round(n).toLocaleString('es-MX'); };
-    var q = function (sel) { return $(sel, quote); };
-    var calc = function () {
-      var pk = ($('input[name="q-privada"]:checked', quote) || {}).value || 'marquesa';
-      var plk = ($('input[name="q-plan"]:checked', quote) || {}).value || 'contado';
-      var pr = quoteData.privadas[pk], pl = quoteData.planes[plk];
-      var precio = pr.precioLista, apartado = quoteData.apartado, saldo = precio - apartado;
-      var priceEl = q('[data-q-price]');
-      priceEl.classList.add('is-updating');
-      setTimeout(function () { priceEl.classList.remove('is-updating'); }, 160);
-      priceEl.textContent = money(precio);
-      q('[data-q-name]').textContent = pr.nombre;
-      q('[data-q-plan-name]').textContent = pl.nombre;
-      q('[data-q-m2]').textContent = money(precio / quoteData.lote.m2);
-      q('[data-q-apartado]').textContent = money(apartado);
-      q('[data-q-total]').textContent = money(precio);
-      var mensual = pl.meses ? saldo / pl.meses : 0;
-      q('[data-q-row-mensual]').hidden = !pl.meses;
-      q('[data-q-row-saldo]').hidden = !!pl.meses;
-      q('[data-q-saldo]').textContent = money(saldo);
-      if (pl.meses) q('[data-q-mensual]').textContent = money(mensual);
+  var QD = null;
+  try { QD = JSON.parse(($('#cotizador-datos') || {}).textContent || 'null'); } catch (e) { QD = null; }
+  if (quote && QD) {
+    var MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    var fmt0 = function (c) { return '$' + Math.round(c / 100).toLocaleString('es-MX'); };
+    var fmt2 = function (c) { return '$' + (c / 100).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+    var dLong = function (d) { return d.getDate() + ' de ' + MESES[d.getMonth()] + ' de ' + d.getFullYear(); };
+    var dShort = function (d) { return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(); };
+    var addMonths = function (base, n, day) { return new Date(base.getFullYear(), base.getMonth() + n, day); };
+    var qs = function (sel) { return $(sel, quote); };
+    var amort = $('[data-q-amort]');
+    var engInput = qs('[data-q-enganche]');
+    var current = null;
+    var engTouched = {};
 
-      var msg = [
-        'Hola, me interesa esta cotización de Los Senderos Residencial:',
-        '',
-        'Privada: ' + pr.nombre,
-        'Lote tipo: ' + quoteData.lote.frente + ' x ' + quoteData.lote.fondo + ' m (' + quoteData.lote.m2 + ' m²)',
-        'Forma de pago: ' + pl.nombre,
-        'Precio de lista: ' + money(precio),
-        'Apartado: ' + money(apartado),
-        pl.meses ? (pl.meses + ' mensualidades de ' + money(mensual)) : ('Saldo en una sola exhibición: ' + money(saldo)),
-        '',
-        '¿Me pueden confirmar disponibilidad y descuentos vigentes?'
-      ].join('\n');
-      q('[data-q-whatsapp]').href = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(msg);
-      q('[data-q-date]').textContent = 'Cotización generada el ' + new Date().toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' }) + ' · lossenderosresidencial.com.mx · (442) 454 5511';
-      return { privada: pr.nombre, plan: pl.nombre };
+    var parseMoney = function (v) { var n = String(v).replace(/[^\d.]/g, ''); return n === '' ? NaN : Math.round(parseFloat(n) * 100); };
+    var showMoneyInput = function (cents) { engInput.value = Math.round(cents / 100).toLocaleString('es-MX'); };
+
+    // Motor de cálculo (todos los importes en centavos)
+    var compute = function (pk, plk, engancheCents) {
+      var pr = QD.privadas[pk], pl = QD.planes[plk];
+      var lista = Math.round(pr.precioLista * 100);
+      var apartado = Math.round(QD.apartado * 100);
+      var r = { privadaKey: pk, planKey: plk, privada: pr.nombre, plan: pl.nombre, tipo: pl.tipo, lista: lista, apartado: apartado };
+      if (pl.tipo === 'contado') { r.precio = lista; r.saldo = lista - apartado; r.total = lista; return r; }
+      if (pl.tipo === 'meses') {
+        r.precio = lista; r.saldo = lista - apartado; r.meses = pl.meses;
+        r.mensual = Math.round(r.saldo / pl.meses); r.total = lista; return r;
+      }
+      // Crédito directo amortizado
+      var desc = Math.round((pl.descuento || 0) * 100);
+      var precio = lista - desc;
+      r.descuento = desc; r.precio = precio;
+      if (!isFinite(engancheCents)) throw new Error('Escribe cuánto quieres dar de enganche.');
+      if (engancheCents < apartado) throw new Error('El enganche debe cubrir al menos el apartado de ' + fmt0(apartado) + '.');
+      if (engancheCents >= precio) throw new Error('El enganche debe ser menor al precio del terreno (' + fmt0(precio) + ').');
+      var apertura = Math.round(pl.apertura * 100);
+      var principal = precio - engancheCents;
+      var tasa = pl.tasaAnual / 100 / 12;
+      var mensual = Math.round(principal * tasa / (1 - Math.pow(1 + tasa, -pl.meses)));
+      // Enganche restante + apertura en N pagos (redondeados al peso; el último se ajusta)
+      var puente = engancheCents - apartado + apertura;
+      var nP = pl.pagosEnganche;
+      var pagoP = Math.ceil(puente / nP / 100) * 100;
+      var ultimoP = puente - pagoP * (nP - 1);
+      // Fechas: pagos de enganche desde el próximo mes; mensualidades después, el día 1
+      var hoy = new Date();
+      var inicioPuente = addMonths(hoy, 1, 2);
+      var schedule = [], saldo = principal;
+      for (var i = 0; i < pl.meses; i++) {
+        var ini = saldo, interes = Math.round(ini * tasa);
+        var pago = i === pl.meses - 1 ? ini + interes : Math.min(mensual, ini + interes);
+        var capital = pago - interes;
+        saldo = ini - capital;
+        schedule.push({ n: i + 1, fecha: addMonths(hoy, nP + 1 + i, 1), ini: ini, pago: pago, capital: capital, interes: interes, fin: saldo });
+      }
+      var intereses = schedule.reduce(function (a, x) { return a + x.interes; }, 0);
+      r.enganche = engancheCents; r.apertura = apertura; r.inicial = engancheCents + apertura;
+      r.principal = principal; r.mensual = mensual; r.tasaAnual = pl.tasaAnual; r.meses = pl.meses;
+      r.puente = puente; r.nPuente = nP; r.pagoPuente = pagoP; r.ultimoPuente = ultimoP; r.inicioPuente = inicioPuente;
+      r.schedule = schedule; r.intereses = intereses; r.total = precio + apertura + intereses;
+      r.primera = schedule[0].fecha; r.ultima = schedule[schedule.length - 1].fecha; r.ultimoPago = schedule[schedule.length - 1].pago;
+      return r;
     };
-    quote.addEventListener('change', function () {
-      var r = calc();
-      track('cotizador_cambio', { privada: r.privada, plan: r.plan });
+
+    var defaultEnganche = function (pk, plk) {
+      var pl = QD.planes[plk], precio = (QD.privadas[pk].precioLista - (pl.descuento || 0)) * 100;
+      return Math.round(precio * pl.enganchePct / 100 / 100) * 100;
+    };
+
+    var line = function (dt, dd, cls) {
+      return '<div' + (cls ? ' class="' + cls + '"' : '') + '><dt>' + dt + '</dt><dd>' + dd + '</dd></div>';
+    };
+
+    var summaryText = function (r) {
+      var L = ['Hola, me interesa esta cotización de Los Senderos Residencial:', '', 'Privada: ' + r.privada,
+        'Lote tipo: ' + QD.lote.frente + ' x ' + QD.lote.fondo + ' m (' + QD.lote.m2 + ' m²)', 'Forma de pago: ' + r.plan,
+        'Precio de lista: ' + fmt2(r.lista)];
+      if (r.tipo === 'contado') L.push('Apartado: ' + fmt2(r.apartado), 'Saldo en una sola exhibición: ' + fmt2(r.saldo));
+      else if (r.tipo === 'meses') L.push('Apartado: ' + fmt2(r.apartado), r.meses + ' mensualidades de ' + fmt2(r.mensual));
+      else {
+        if (r.descuento) L.push('Descuento: ' + fmt2(r.descuento), 'Precio del terreno: ' + fmt2(r.precio));
+        L.push('Enganche (incluye apartado de ' + fmt0(r.apartado) + '): ' + fmt2(r.enganche),
+          'Apertura de crédito (pago único): ' + fmt2(r.apertura),
+          'Enganche + apertura: ' + fmt2(r.inicial) + ' (apartado + ' + (r.nPuente - 1) + ' pagos de ' + fmt2(r.pagoPuente) + ' y uno de ' + fmt2(r.ultimoPuente) + ')',
+          'Saldo a financiar: ' + fmt2(r.principal),
+          'Mensualidad: ' + fmt2(r.mensual) + ' (' + r.meses + ' pagos, tasa anual ' + r.tasaAnual + '%)',
+          'Primera mensualidad: ' + dShort(r.primera), 'Intereses: ' + fmt2(r.intereses),
+          'Total con financiamiento y apertura: ' + fmt2(r.total), 'Sin revisión de buró y sin aval.');
+      }
+      L.push('', '¿Me pueden confirmar disponibilidad y descuentos vigentes?');
+      return L.join('\n');
+    };
+
+    var renderTable = function (r) {
+      var body = $('[data-q-a-body]', amort);
+      var html = '';
+      r.schedule.forEach(function (x) {
+        html += '<tr><td>' + x.n + '</td><td>' + dShort(x.fecha) + '</td><td>' + fmt2(x.ini) + '</td><td>' + fmt2(x.pago) + '</td><td>' + fmt2(x.capital) + '</td><td>' + fmt2(x.interes) + '</td><td>' + fmt2(x.fin) + '</td></tr>';
+      });
+      body.innerHTML = html;
+      $('[data-q-a-principal]', amort).textContent = fmt2(r.principal);
+      $('[data-q-a-interest]', amort).textContent = fmt2(r.intereses);
+      $('[data-q-a-total]', amort).textContent = fmt2(r.total);
+      $('[data-q-a-info]', amort).textContent = r.privada + ' · ' + r.meses + ' mensualidades de ' + fmt2(r.mensual) + ' · tasa mensual ' + (r.tasaAnual / 12).toLocaleString('es-MX') + '% · del ' + dShort(r.primera) + ' al ' + dShort(r.ultima);
+    };
+
+    var setError = function (msg) {
+      var err = qs('[data-q-error]');
+      err.hidden = !msg; err.textContent = msg || '';
+      engInput.setAttribute('aria-invalid', msg ? 'true' : 'false');
+      quote.classList.toggle('is-invalid', !!msg);
+    };
+
+    var render = function () {
+      var pk = ($('input[name="q-privada"]:checked', quote) || {}).value || 'marquesa';
+      var allowed = QD.privadas[pk].planes;
+      // Formas de pago disponibles para la privada
+      $$('input[name="q-plan"]', quote).forEach(function (inp) {
+        var ok = allowed.indexOf(inp.value) > -1;
+        inp.closest('.q-opt').hidden = !ok;
+        if (!ok && inp.checked) inp.checked = false;
+      });
+      var checked = $('input[name="q-plan"]:checked', quote);
+      if (!checked) { checked = $('input[name="q-plan"][value="' + allowed[0] + '"]', quote); checked.checked = true; }
+      var plk = checked.value, pl = QD.planes[plk];
+      var isCredit = pl.tipo === 'amortizado';
+      qs('[data-credit-fields]').hidden = !isCredit;
+      qs('[data-lot-step]').textContent = isCredit ? '4' : '3';
+      amort.hidden = !isCredit;
+      qs('[data-q-amort-link]').hidden = !isCredit;
+
+      var key = pk + '|' + plk;
+      if (isCredit) {
+        var def = defaultEnganche(pk, plk);
+        if (!engTouched[key]) showMoneyInput(def);
+        var presets = [def, 20000000, 50000000];
+        qs('[data-q-presets]').innerHTML = presets.map(function (c, i) {
+          return '<button type="button" class="q-chip" data-amount="' + c + '">' + fmt0(c) + (i === 0 ? ' <small>(' + pl.enganchePct + '%)</small>' : '') + '</button>';
+        }).join('');
+        qs('[data-q-enganche-note]').textContent = 'Enganche sugerido: ' + fmt0(def) + ' (' + pl.enganchePct + '% del precio). Incluye el apartado de ' + fmt0(QD.apartado * 100) + '; el resto y la apertura se cubren en ' + pl.pagosEnganche + ' pagos.';
+      }
+
+      var r;
+      try { r = compute(pk, plk, isCredit ? parseMoney(engInput.value) : 0); setError(''); }
+      catch (e) {
+        setError(e.message); current = null;
+        qs('[data-q-hero]').textContent = '—';
+        return;
+      }
+      current = r;
+      $$('.q-chip', quote).forEach(function (b) { b.classList.toggle('is-active', +b.getAttribute('data-amount') === r.enganche); });
+
+      qs('[data-q-name]').textContent = r.privada;
+      qs('[data-q-plan-name]').textContent = r.plan;
+      var hero = qs('[data-q-hero]');
+      hero.classList.add('is-updating'); setTimeout(function () { hero.classList.remove('is-updating'); }, 160);
+      var lines = '';
+      if (r.tipo === 'amortizado') {
+        qs('[data-q-hero-label]').textContent = 'Tu mensualidad estimada';
+        hero.innerHTML = fmt2(r.mensual).replace(/(\.\d\d)$/, '<small>$1</small>');
+        qs('[data-q-hero-sub]').textContent = r.meses + ' mensualidades · tasa anual ' + r.tasaAnual + '% · MXN';
+        lines += line('Precio de lista', fmt2(r.lista));
+        if (r.descuento) lines += line('Descuento', '−' + fmt2(r.descuento));
+        lines += line('Enganche <small>incluye apartado</small>', fmt2(r.enganche));
+        lines += line('Apertura de crédito <small>pago único</small>', fmt2(r.apertura));
+        lines += line('Enganche + apertura', fmt2(r.inicial), 'is-strong');
+        lines += line('Saldo a financiar', fmt2(r.principal), 'is-strong');
+        lines += line('Primera mensualidad', dLong(r.primera));
+        lines += line('Total con intereses y apertura', fmt2(r.total), 'quote-total');
+        var br = qs('[data-q-bridge]'); br.hidden = false;
+        br.textContent = 'Apartado de ' + fmt0(r.apartado) + ' y después ' + (r.nPuente - 1) + ' pagos de ' + fmt2(r.pagoPuente) + ' y uno de ' + fmt2(r.ultimoPuente) + ' para completar enganche y apertura, a partir de ' + MESES[r.inicioPuente.getMonth()] + ' de ' + r.inicioPuente.getFullYear() + '.';
+        qs('[data-q-note]').textContent = 'Simulación con precio de lista al ' + QD.fechaLista + ', sin descuentos ni promociones. No reserva el lote ni aprueba el crédito; un asesor confirmará disponibilidad, fechas y condiciones finales.';
+        renderTable(r);
+      } else {
+        qs('[data-q-bridge]').hidden = true;
+        qs('[data-q-hero-label]').textContent = 'Precio de lista';
+        hero.textContent = fmt0(r.precio);
+        qs('[data-q-hero-sub]').textContent = fmt0(r.precio / QD.lote.m2) + ' por m² · lote de ' + QD.lote.m2 + ' m²';
+        lines += line('Apartado', fmt0(r.apartado));
+        if (r.tipo === 'contado') lines += line('Saldo en una sola exhibición', fmt0(r.saldo));
+        else lines += line(r.meses + ' mensualidades de', fmt0(r.mensual), 'quote-monthly');
+        lines += line('Total', fmt0(r.total), 'quote-total');
+        qs('[data-q-note]').textContent = 'Precios de lista al ' + QD.fechaLista + ', sin descuentos ni promociones. Sujetos a cambio y disponibilidad. Un asesor te confirmará el precio final y los descuentos vigentes.';
+      }
+      qs('[data-q-lines]').innerHTML = lines;
+      qs('[data-q-whatsapp]').href = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(summaryText(r));
+    };
+
+    quote.addEventListener('change', function (e) {
+      if (e.target === engInput) return;
+      render();
+      if (current) track('cotizador_cambio', { privada: current.privada, plan: current.plan });
     });
-    q('[data-q-whatsapp]').addEventListener('click', function () {
-      var r = calc();
-      track('cotizador_whatsapp', { privada: r.privada, plan: r.plan });
+    engInput.addEventListener('input', function () {
+      var pk = ($('input[name="q-privada"]:checked', quote) || {}).value, plk = ($('input[name="q-plan"]:checked', quote) || {}).value;
+      engTouched[pk + '|' + plk] = true; render();
     });
-    q('[data-q-print]').addEventListener('click', function () {
-      document.body.classList.add('print-quote');
-      track('cotizador_imprimir');
-      window.print();
+    engInput.addEventListener('blur', function () { var c = parseMoney(engInput.value); if (isFinite(c)) showMoneyInput(c); });
+    quote.addEventListener('click', function (e) {
+      var chip = e.target.closest && e.target.closest('.q-chip');
+      if (!chip) return;
+      var pk = ($('input[name="q-privada"]:checked', quote) || {}).value, plk = ($('input[name="q-plan"]:checked', quote) || {}).value;
+      engTouched[pk + '|' + plk] = true;
+      showMoneyInput(+chip.getAttribute('data-amount')); render();
     });
-    window.addEventListener('afterprint', function () { document.body.classList.remove('print-quote'); });
-    calc();
+    qs('[data-q-whatsapp]').addEventListener('click', function (e) {
+      if (!current) { e.preventDefault(); return; }
+      track('cotizador_whatsapp', { privada: current.privada, plan: current.plan });
+    });
+    qs('[data-q-amort-link]').addEventListener('click', function () { amort.open = true; });
+
+    // Descargas
+    var download = function (blob, name) {
+      var url = URL.createObjectURL(blob), a = document.createElement('a');
+      a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+    };
+    var slug = function (r) { return r.privada.replace(/\s+/g, '_').normalize('NFD').replace(/[̀-ͯ]/g, ''); };
+    $$('[data-q-csv]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var r = current; if (!r || !r.schedule) return;
+        var n = function (c) { return (c / 100).toFixed(2); };
+        var rows = [
+          ['Cotización Los Senderos Residencial'], ['Privada', r.privada], ['Lote tipo', QD.lote.frente + ' x ' + QD.lote.fondo + ' m (' + QD.lote.m2 + ' m2)'],
+          ['Precio de lista', n(r.lista)], ['Enganche (incluye apartado)', n(r.enganche)], ['Apertura de credito', n(r.apertura)],
+          ['Saldo a financiar', n(r.principal)], ['Tasa anual %', r.tasaAnual], ['Mensualidad', n(r.mensual)], ['Intereses', n(r.intereses)],
+          ['Total con intereses y apertura', n(r.total)], [],
+          ['Pago', 'Fecha', 'Saldo inicial', 'Mensualidad', 'Capital', 'Interes', 'Saldo final']
+        ].concat(r.schedule.map(function (x) { return [x.n, dShort(x.fecha), n(x.ini), n(x.pago), n(x.capital), n(x.interes), n(x.fin)]; }));
+        download(new Blob(['﻿' + rows.map(function (row) { return row.join(','); }).join('\r\n')], { type: 'text/csv;charset=utf-8' }), 'Amortizacion_' + slug(r) + '.csv');
+        track('cotizador_csv');
+      });
+    });
+
+    var jsPdfReady = null;
+    var loadJsPdf = function () {
+      if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve();
+      if (jsPdfReady) return jsPdfReady;
+      jsPdfReady = new Promise(function (ok, fail) {
+        var s = document.createElement('script');
+        s.src = 'assets/js/vendor/jspdf.umd.min.js'; s.onload = ok; s.onerror = fail;
+        document.head.appendChild(s);
+      });
+      return jsPdfReady;
+    };
+    var pdfText = function (txt) { return String(txt).replace(/²/g, '2').replace(/−/g, '-'); };
+    var buildPdf = function (r) {
+      var doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'letter' });
+      var W = 216, M = 18, page = 1;
+      var header = function (title) {
+        doc.setFillColor(31, 54, 20); doc.rect(0, 0, W, 30, 'F');
+        doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.text('Los Senderos Residencial', M, 14);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(221, 217, 163);
+        doc.text('lossenderosresidencial.com.mx  |  WhatsApp (442) 823 0513  |  Tel. (442) 454 5511', M, 21);
+        doc.text('Cotizacion generada el ' + dShort(new Date()), W - M, 14, { align: 'right' });
+        doc.setTextColor(60, 99, 40); doc.setFont('helvetica', 'bold'); doc.setFontSize(15); doc.text(pdfText(title), M, 44);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(120, 120, 110);
+        doc.text('Pagina ' + page, W - M, 272, { align: 'right' });
+      };
+      header(r.privada + ' - ' + r.plan);
+      var y = 52;
+      doc.setFillColor(60, 99, 40); doc.roundedRect(M, y, W - 2 * M, 30, 3, 3, 'F');
+      doc.setTextColor(221, 217, 163); doc.setFontSize(9);
+      doc.text(r.tipo === 'amortizado' ? 'Mensualidad estimada - ' + r.meses + ' pagos - tasa anual ' + r.tasaAnual + '%' : 'Precio de lista', M + 8, y + 10);
+      doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(24);
+      doc.text((r.tipo === 'amortizado' ? fmt2(r.mensual) : fmt2(r.precio)) + ' MXN', M + 8, y + 23);
+      y += 42;
+      var rows = [['Lote tipo', QD.lote.frente + ' x ' + QD.lote.fondo + ' m (' + QD.lote.m2 + ' m2)'], ['Precio de lista', fmt2(r.lista)]];
+      if (r.tipo === 'contado') rows.push(['Apartado', fmt2(r.apartado)], ['Saldo en una sola exhibicion', fmt2(r.saldo)], ['Total', fmt2(r.total)]);
+      else if (r.tipo === 'meses') rows.push(['Apartado', fmt2(r.apartado)], [r.meses + ' mensualidades de', fmt2(r.mensual)], ['Total', fmt2(r.total)]);
+      else {
+        if (r.descuento) rows.push(['Descuento', '-' + fmt2(r.descuento)], ['Precio del terreno', fmt2(r.precio)]);
+        rows.push(['Enganche (incluye apartado de ' + fmt0(r.apartado) + ')', fmt2(r.enganche)], ['Apertura de credito (pago unico)', fmt2(r.apertura)],
+          ['Enganche + apertura', fmt2(r.inicial)], [(r.nPuente - 1) + ' pagos de enganche y apertura', fmt2(r.pagoPuente)], ['Ultimo pago de enganche y apertura', fmt2(r.ultimoPuente)],
+          ['Saldo a financiar', fmt2(r.principal)], ['Primera mensualidad', dShort(r.primera)], ['Ultima mensualidad', dShort(r.ultima) + ' - ' + fmt2(r.ultimoPago)],
+          ['Intereses del credito', fmt2(r.intereses)], ['Total con intereses y apertura', fmt2(r.total)]);
+      }
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+      rows.forEach(function (row) {
+        doc.setTextColor(76, 85, 70); doc.text(pdfText(row[0]), M, y);
+        doc.setTextColor(31, 54, 20); doc.setFont('helvetica', 'bold'); doc.text(pdfText(row[1]), W - M, y, { align: 'right' }); doc.setFont('helvetica', 'normal');
+        doc.setDrawColor(230, 226, 210); doc.line(M, y + 3, W - M, y + 3); y += 8.5;
+      });
+      y += 4; doc.setFontSize(8); doc.setTextColor(110, 110, 100);
+      var note = r.tipo === 'amortizado'
+        ? 'Credito directo sin revision de buro y sin aval. Simulacion con precio de lista al ' + QD.fechaLista + ', sin descuentos ni promociones. Las fechas son estimadas a partir de hoy. No reserva el lote ni aprueba el credito; un asesor confirmara disponibilidad, fechas y condiciones finales.'
+        : 'Precios de lista al ' + QD.fechaLista + ', sin descuentos ni promociones. Sujetos a cambio y disponibilidad. Un asesor confirmara el precio final y los descuentos vigentes.';
+      doc.text(doc.splitTextToSize(note, W - 2 * M), M, y);
+
+      if (r.schedule) {
+        var per = 36, xs = [M + 2, M + 16, 78, 106, 134, 160, W - M - 2];
+        for (var s = 0; s < r.schedule.length; s += per) {
+          doc.addPage(); page++; header('Tabla de amortizacion - ' + r.privada);
+          doc.setFontSize(8); doc.setTextColor(90, 90, 80);
+          doc.text(pdfText('Saldo financiado ' + fmt2(r.principal) + '  |  Mensualidad ' + fmt2(r.mensual) + '  |  Tasa mensual ' + (r.tasaAnual / 12) + '%  |  Importes en MXN'), M, 51);
+          doc.setFillColor(239, 233, 214); doc.rect(M, 55, W - 2 * M, 8, 'F');
+          doc.setFont('helvetica', 'bold'); doc.setTextColor(31, 54, 20);
+          ['Pago', 'Fecha', 'Saldo inicial', 'Mensualidad', 'Capital', 'Interes', 'Saldo final'].forEach(function (h, i) { doc.text(h, xs[i], 60.5, { align: i > 1 ? 'right' : 'left' }); });
+          doc.setFont('helvetica', 'normal');
+          var ry = 68;
+          r.schedule.slice(s, s + per).forEach(function (x) {
+            if (x.n % 2 === 0) { doc.setFillColor(247, 244, 234); doc.rect(M, ry - 4.2, W - 2 * M, 5.8, 'F'); }
+            doc.setTextColor(60, 66, 55);
+            [String(x.n), dShort(x.fecha), fmt2(x.ini), fmt2(x.pago), fmt2(x.capital), fmt2(x.interes), fmt2(x.fin)].forEach(function (v, i) { doc.text(v, xs[i], ry, { align: i > 1 ? 'right' : 'left' }); });
+            ry += 5.6;
+          });
+        }
+      }
+      return doc;
+    };
+    $$('[data-q-pdf]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var r = current; if (!r) return;
+        var label = btn.innerHTML; btn.disabled = true; btn.textContent = 'Generando…';
+        loadJsPdf().then(function () {
+          buildPdf(r).save('Cotizacion_' + slug(r) + '_' + r.plan.replace(/\s+/g, '_').normalize('NFD').replace(/[̀-ͯ]/g, '') + '.pdf');
+          track('cotizador_pdf', { privada: r.privada, plan: r.plan });
+        }).catch(function () {
+          alert('No se pudo generar el PDF. Puedes enviar tu cotización por WhatsApp.');
+        }).then(function () { btn.disabled = false; btn.innerHTML = label; });
+      });
+    });
+
+    render();
   }
 
   /* ---------- Masterplan interactivo ---------- */
