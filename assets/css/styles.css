@@ -1060,3 +1060,91 @@ body.dialog-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .ticker-track { animation: none; } }
 @media (min-width: 768px) { .hc-mask span { font-size: clamp(6rem, 16.5vw, 15rem); } }
 @media (max-width: 767px) { .hc-mask span { font-size: 25vw; } }
+
+
+/* =====================================================================
+   Cotizador
+   ===================================================================== */
+.privadas-ctas { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.quote { background: var(--cream-100); }
+.quote-shell {
+  display: grid; grid-template-columns: 1.25fr 1fr; overflow: hidden;
+  background: #fff; border-radius: 28px; border: 1px solid rgb(60 99 40 / .08); box-shadow: var(--shadow);
+}
+.quote-form { padding: clamp(22px, 3.5vw, 40px); display: grid; gap: 26px; }
+.quote-step { border: 0; margin: 0; padding: 0; }
+.quote-step legend, .quote-lot-title {
+  display: flex; align-items: center; gap: 10px; padding: 0; margin: 0 0 12px;
+  font-weight: 600; color: var(--green-800); font-size: 1rem;
+}
+.step-n { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--green-700); color: #fff; font-size: .8rem; }
+.quote-options { display: grid; gap: 10px; }
+.quote-options--3 { grid-template-columns: repeat(3, 1fr); }
+.quote-options--2 { grid-template-columns: repeat(2, 1fr); }
+.q-opt { position: relative; cursor: pointer; }
+.q-opt input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.q-card {
+  height: 100%; display: grid; justify-items: center; align-content: center; gap: 8px; text-align: center;
+  padding: 14px 10px; border-radius: 18px; background: var(--cream-100); border: 2px solid transparent;
+  transition: border-color .2s, background .2s, transform .2s var(--ease);
+}
+.q-card img { height: 46px; width: auto; filter: brightness(0) saturate(100%) invert(30%) sepia(31%) saturate(813%) hue-rotate(56deg) brightness(92%) contrast(86%); }
+.q-card b { font-size: .92rem; color: var(--green-800); }
+.q-card small { font-size: .8rem; color: var(--ink-soft); line-height: 1.4; }
+.q-card--plan { justify-items: start; text-align: left; padding: 16px 18px; }
+.q-card--plan b { font-size: 1.05rem; }
+.q-opt:hover .q-card { border-color: var(--gold-300); }
+.q-opt input:checked + .q-card { border-color: var(--green-700); background: #fff; box-shadow: 0 0 0 4px rgb(60 99 40 / .1); }
+.q-opt input:focus-visible + .q-card { outline: 3px solid var(--gold-500); outline-offset: 2px; }
+.lot-box { display: flex; align-items: center; gap: 18px; padding: 14px 18px; border-radius: 18px; background: var(--cream-100); }
+.lot-box b { display: block; color: var(--green-800); }
+.lot-box span { font-size: .85rem; color: var(--ink-soft); }
+
+.quote-result {
+  position: relative; padding: clamp(24px, 3.5vw, 40px); color: #fff;
+  background:
+    radial-gradient(ellipse 80% 60% at 100% 0%, rgb(177 173 97 / .25), transparent 60%),
+    linear-gradient(160deg, #1f3614, #2a4a1c);
+  display: flex; flex-direction: column;
+}
+.quote-kicker { font-size: .78rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--gold-300); margin-bottom: 18px; }
+.quote-label { font-size: .85rem; color: rgb(255 255 255 / .75); margin: 0; }
+.quote-price { font-family: var(--font-display); font-size: clamp(2.8rem, 5vw, 3.8rem); font-weight: 600; line-height: 1; margin: 4px 0 6px; transition: opacity .2s; }
+.quote-price.is-updating { opacity: .3; }
+.quote-m2 { font-size: .85rem; color: rgb(255 255 255 / .7); }
+.quote-lines { margin: 10px 0 22px; display: grid; }
+.quote-lines div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px dashed rgb(255 255 255 / .18); }
+.quote-lines dt { color: rgb(255 255 255 / .8); font-size: .92rem; }
+.quote-lines dd { margin: 0; font-weight: 600; white-space: nowrap; }
+.quote-monthly dd { color: var(--gold-300); font-size: 1.15rem; }
+.quote-total { border-bottom: 0 !important; }
+.quote-total dt { color: #fff; font-weight: 600; }
+.quote-total dd { font-family: var(--font-display); font-size: 1.5rem; }
+.quote-actions { display: grid; gap: 10px; margin-top: auto; }
+.quote-note { font-size: .74rem; color: rgb(255 255 255 / .6); margin: 14px 0 0; }
+.quote-print-meta { display: none; }
+@media (max-width: 900px) { .quote-shell { grid-template-columns: 1fr; } }
+@media (max-width: 480px) {
+  .quote-options--3 { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .q-card { padding: 10px 4px; border-radius: 14px; }
+  .q-card img { height: 30px; }
+  .q-card b { font-size: .78rem; }
+  .quote-options--2 { grid-template-columns: 1fr; }
+}
+
+/* Impresión: solo la cotización */
+@media print {
+  body.print-quote > *:not(main), body.print-quote main > *:not(#cotizador),
+  body.print-quote #cotizador .section-head, body.print-quote .quote-actions,
+  body.print-quote .wa-float, body.print-quote .to-top { display: none !important; }
+  body.print-quote { background: #fff; }
+  body.print-quote #cotizador { padding: 0; }
+  body.print-quote .quote-shell { box-shadow: none; border: 1px solid #ccc; grid-template-columns: 1fr 1fr; }
+  body.print-quote .quote-result { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body.print-quote .quote-print-meta { display: block; font-size: .8rem; color: rgb(255 255 255 / .8); margin-top: 8px; }
+  body.print-quote .reveal { opacity: 1 !important; transform: none !important; }
+}
+.quote-lines div[hidden] { display: none; }
+.btn--wa { --bg: #25d366; --fg: #fff; }
+.btn--wa:hover { --bg: #1ebe5a; }
+.quote-wa-hint { font-size: .8rem; color: rgb(255 255 255 / .7); text-align: center; margin: -2px 0 4px; }

@@ -38,7 +38,7 @@
   <link rel="preload" as="image" href="assets/img/portada-poster-movil.webp" media="(max-width: 767px)" fetchpriority="high">
   <link rel="preload" as="image" href="assets/img/portada-poster.webp" media="(min-width: 768px)" fetchpriority="high">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Poppins:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="assets/css/styles.css?v=2473b156">
+  <link rel="stylesheet" href="assets/css/styles.css?v=a006576f">
 
   <!-- Datos estructurados (schema.org) -->
   <script type="application/ld+json">
@@ -162,7 +162,7 @@
           <li><a href="#casa-club">Casa club</a></li>
           <li><a href="#galeria">Galería</a></li>
           <li><a href="#privadas">Privadas</a></li>
-          <li><a href="#recorrido-virtual">Recorrido virtual</a></li>
+          <li><a href="#cotizador">Cotizador</a></li>
           <li><a href="#contacto">Contacto</a></li>
         </ul>
         <a class="btn btn--gold btn--sm nav-cta" href="tel:+524424545511">
@@ -520,9 +520,118 @@
           </article>
         </div>
         <p class="fine-print">*Precios desde $1.1 MDP, sujetos a disponibilidad. Consulta condiciones con un asesor.</p>
-        <div class="center">
+        <div class="center privadas-ctas">
+          <a class="btn btn--gold" href="#cotizador">Cotiza tu terreno</a>
           <button class="btn btn--ghost" type="button" data-open-promos>Ver promociones vigentes</button>
         </div>
+      </div>
+    </section>
+
+    <!-- ============ COTIZADOR ============
+         Precios de lista sin descuentos ni promociones (listas del 27 de octubre de 2026).
+         Para actualizar precios o condiciones, edita el JSON "cotizador-datos" de abajo. -->
+    <section class="section quote" id="cotizador" aria-labelledby="cotizador-title">
+      <div class="container">
+        <header class="section-head reveal">
+          <p class="eyebrow">Cotizador</p>
+          <h2 id="cotizador-title">Cotiza tu terreno en segundos</h2>
+          <p>Elige la privada y la forma de pago para ver el precio de lista de un lote tipo de 8 × 18 m.</p>
+        </header>
+
+        <div class="quote-shell reveal" data-quote>
+          <div class="quote-form">
+            <fieldset class="quote-step">
+              <legend><span class="step-n">1</span> Elige la privada</legend>
+              <div class="quote-options quote-options--3">
+                <label class="q-opt">
+                  <input type="radio" name="q-privada" value="marquesa" checked>
+                  <span class="q-card"><img src="assets/img/logo-la-marquesa.webp" alt="" width="450" height="224" loading="lazy"><b>La Marquesa</b></span>
+                </label>
+                <label class="q-opt">
+                  <input type="radio" name="q-privada" value="santiago">
+                  <span class="q-card"><img src="assets/img/logo-santiago.webp" alt="" width="450" height="224" loading="lazy"><b>Santiago</b></span>
+                </label>
+                <label class="q-opt">
+                  <input type="radio" name="q-privada" value="antigua">
+                  <span class="q-card"><img src="assets/img/logo-antigua.webp" alt="" width="300" height="118" loading="lazy"><b>Antigua</b></span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="quote-step">
+              <legend><span class="step-n">2</span> Forma de pago</legend>
+              <div class="quote-options quote-options--2">
+                <label class="q-opt">
+                  <input type="radio" name="q-plan" value="contado" checked>
+                  <span class="q-card q-card--plan"><b>Contado</b><small>Apartado y saldo en una sola exhibición</small></span>
+                </label>
+                <label class="q-opt">
+                  <input type="radio" name="q-plan" value="12">
+                  <span class="q-card q-card--plan"><b>Crédito a 12 meses</b><small>Apartado y saldo en 12 mensualidades</small></span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div class="quote-step quote-lot">
+              <p class="quote-lot-title"><span class="step-n">3</span> Lote tipo</p>
+              <div class="lot-box">
+                <svg class="lot-svg" viewBox="0 0 120 200" width="72" height="120" aria-hidden="true">
+                  <rect x="22" y="12" width="76" height="170" rx="4" fill="#efe9d6" stroke="#3c6328" stroke-width="3"/>
+                  <line x1="22" y1="194" x2="98" y2="194" stroke="#b1ad61" stroke-width="2"/>
+                  <text x="60" y="191" text-anchor="middle" font-size="13" font-weight="600" fill="#3c6328" font-family="Poppins, sans-serif" dy="-4">8 m</text>
+                  <line x1="108" y1="12" x2="108" y2="182" stroke="#b1ad61" stroke-width="2"/>
+                  <text x="114" y="100" font-size="13" font-weight="600" fill="#3c6328" font-family="Poppins, sans-serif" transform="rotate(90 114 100)" text-anchor="middle">18 m</text>
+                </svg>
+                <div>
+                  <b>8 m de frente × 18 m de fondo</b>
+                  <span>144 m² · precio de lista sin descuentos</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="quote-result" aria-live="polite">
+            <p class="quote-kicker"><span data-q-name>La Marquesa Privada Club</span> · <span data-q-plan-name>Contado</span></p>
+            <p class="quote-label">Precio de lista</p>
+            <p class="quote-price" data-q-price>$1,107,144</p>
+            <p class="quote-m2"><span data-q-m2>$7,688</span> por m² · lote de 144 m²</p>
+
+            <dl class="quote-lines">
+              <div><dt>Apartado</dt><dd data-q-apartado>$30,000</dd></div>
+              <div data-q-row-saldo><dt data-q-saldo-label>Saldo en una sola exhibición</dt><dd data-q-saldo>$1,077,144</dd></div>
+              <div class="quote-monthly" data-q-row-mensual hidden><dt>12 mensualidades de</dt><dd data-q-mensual>$0</dd></div>
+              <div class="quote-total"><dt>Total</dt><dd data-q-total>$1,107,144</dd></div>
+            </dl>
+
+            <div class="quote-actions">
+              <a class="btn btn--wa btn--block btn--lg" href="#" target="_blank" rel="noopener" data-q-whatsapp>
+                <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.3-.5 0-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.1.1.7-.1 1.3z"/></svg>
+                Enviar mi cotización por WhatsApp
+              </a>
+              <p class="quote-wa-hint">Un asesor te responde con disponibilidad y descuentos vigentes.</p>
+              <button class="btn btn--outline-light btn--block" type="button" data-q-print>Imprimir o guardar en PDF</button>
+            </div>
+            <p class="quote-note">Precios de lista al 27 de octubre de 2026, sin descuentos ni promociones. Sujetos a cambio y disponibilidad. Un asesor te confirmará el precio final y los descuentos vigentes.</p>
+            <p class="quote-print-meta" data-q-date></p>
+          </div>
+        </div>
+
+        <script type="application/json" id="cotizador-datos">
+        {
+          "apartado": 30000,
+          "lote": { "frente": 8, "fondo": 18, "m2": 144 },
+          "fechaLista": "27 de octubre de 2026",
+          "privadas": {
+            "marquesa": { "nombre": "La Marquesa Privada Club", "precioLista": 1107144 },
+            "santiago": { "nombre": "Santiago Privada Club", "precioLista": 1341461 },
+            "antigua":  { "nombre": "Antigua Privada Club", "precioLista": 1230000 }
+          },
+          "planes": {
+            "contado": { "nombre": "Contado", "meses": 0 },
+            "12": { "nombre": "Crédito a 12 meses", "meses": 12 }
+          }
+        }
+        </script>
       </div>
     </section>
 
@@ -785,6 +894,6 @@
     <button class="lb-nav lb-next" type="button" data-lb-next aria-label="Imagen siguiente">›</button>
   </dialog>
 
-  <script src="assets/js/main.js?v=40a78a95" defer></script>
+  <script src="assets/js/main.js?v=4e8c5102" defer></script>
 </body>
 </html>

@@ -408,6 +408,66 @@
     });
   }
 
+  /* ---------- Cotizador ---------- */
+  var quote = $('[data-quote]');
+  var quoteData = null;
+  try { quoteData = JSON.parse(($('#cotizador-datos') || {}).textContent || 'null'); } catch (e) { quoteData = null; }
+  if (quote && quoteData) {
+    var money = function (n) { return '$' + Math.round(n).toLocaleString('es-MX'); };
+    var q = function (sel) { return $(sel, quote); };
+    var calc = function () {
+      var pk = ($('input[name="q-privada"]:checked', quote) || {}).value || 'marquesa';
+      var plk = ($('input[name="q-plan"]:checked', quote) || {}).value || 'contado';
+      var pr = quoteData.privadas[pk], pl = quoteData.planes[plk];
+      var precio = pr.precioLista, apartado = quoteData.apartado, saldo = precio - apartado;
+      var priceEl = q('[data-q-price]');
+      priceEl.classList.add('is-updating');
+      setTimeout(function () { priceEl.classList.remove('is-updating'); }, 160);
+      priceEl.textContent = money(precio);
+      q('[data-q-name]').textContent = pr.nombre;
+      q('[data-q-plan-name]').textContent = pl.nombre;
+      q('[data-q-m2]').textContent = money(precio / quoteData.lote.m2);
+      q('[data-q-apartado]').textContent = money(apartado);
+      q('[data-q-total]').textContent = money(precio);
+      var mensual = pl.meses ? saldo / pl.meses : 0;
+      q('[data-q-row-mensual]').hidden = !pl.meses;
+      q('[data-q-row-saldo]').hidden = !!pl.meses;
+      q('[data-q-saldo]').textContent = money(saldo);
+      if (pl.meses) q('[data-q-mensual]').textContent = money(mensual);
+
+      var msg = [
+        'Hola, me interesa esta cotización de Los Senderos Residencial:',
+        '',
+        'Privada: ' + pr.nombre,
+        'Lote tipo: ' + quoteData.lote.frente + ' x ' + quoteData.lote.fondo + ' m (' + quoteData.lote.m2 + ' m²)',
+        'Forma de pago: ' + pl.nombre,
+        'Precio de lista: ' + money(precio),
+        'Apartado: ' + money(apartado),
+        pl.meses ? (pl.meses + ' mensualidades de ' + money(mensual)) : ('Saldo en una sola exhibición: ' + money(saldo)),
+        '',
+        '¿Me pueden confirmar disponibilidad y descuentos vigentes?'
+      ].join('\n');
+      q('[data-q-whatsapp]').href = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(msg);
+      q('[data-q-date]').textContent = 'Cotización generada el ' + new Date().toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' }) + ' · lossenderosresidencial.com.mx · (442) 454 5511';
+      return { privada: pr.nombre, plan: pl.nombre };
+    };
+    quote.addEventListener('change', function () {
+      var r = calc();
+      track('cotizador_cambio', { privada: r.privada, plan: r.plan });
+    });
+    q('[data-q-whatsapp]').addEventListener('click', function () {
+      var r = calc();
+      track('cotizador_whatsapp', { privada: r.privada, plan: r.plan });
+    });
+    q('[data-q-print]').addEventListener('click', function () {
+      document.body.classList.add('print-quote');
+      track('cotizador_imprimir');
+      window.print();
+    });
+    window.addEventListener('afterprint', function () { document.body.classList.remove('print-quote'); });
+    calc();
+  }
+
   /* ---------- Masterplan interactivo ---------- */
   $$('[data-masterplan]').forEach(function (mp) {
     var pins = $$('[data-pin]', mp);
