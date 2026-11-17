@@ -40,12 +40,20 @@ sesión; el botón "Accede a promociones" siempre lo abre.
 ## Cotizador
 
 Los precios, plazos, tasa, apertura y enganche están en el bloque JSON
-`cotizador-datos` dentro de `index.html`. La Marquesa usa el plan `credito10`
+`cotizador-datos` dentro de `index.html`. Cada privada lista sus formas de pago en `planes` (La Marquesa: `credito10`;
+Santiago: `contado`, `12`, `24` y `9010`; Antigua: `contado`). Los planes de 12 y
+24 meses son sin intereses y generan su tabla de pagos; el Plan 90-10 calcula un
+10% de enganche y el 90% con crédito bancario o Infonavit. La Marquesa usa el plan `credito10`
 (crédito directo a 120 meses, 12% anual, apertura de $10,000, enganche sugerido
 del 10% y 6 pagos para completar enganche y apertura). `descuento` está en 0
 para cotizar a precio de lista; con `100000` se reproduce el simulador de
 referencia ($13,004.64 al mes). El PDF se genera con jsPDF
 (`assets/js/vendor/jspdf.umd.min.js`, se carga solo al descargar).
+
+## Portada
+
+La palabra "senderos" sobre el video es `assets/img/senderos-palabra.svg`,
+vectorizada del logo original, y se aplica como máscara en `.hc-mask`.
 
 ## Caché del navegador
 

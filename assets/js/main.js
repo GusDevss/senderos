@@ -283,7 +283,12 @@
       var img = $('img', el);
       return { src: el.getAttribute('data-lightbox'), alt: img ? img.alt : '', caption: el.getAttribute('data-caption') || (img ? img.alt : '') };
     };
+    var setZoom = function (on) {
+      lb.classList.toggle('is-zoomed', !!on);
+      if (!on) lbImg.style.transformOrigin = '';
+    };
     var showAt = function (i) {
+      setZoom(false);
       lbIndex = (i + lbList.length) % lbList.length;
       var it = lbList[lbIndex];
       lbImg.classList.add('is-loading');
@@ -312,6 +317,26 @@
       openDialog(lb);
     });
 
+    // Abrir el visor desde otros componentes (p. ej. el masterplan)
+    window.__openLightbox = function (list, index) {
+      lbList = list; lb.classList.toggle('is-single', lbList.length < 2);
+      showAt(index || 0); openDialog(lb);
+    };
+    // Zoom: tocar o hacer clic en la imagen acerca; mover el puntero recorre la imagen
+    var moveOrigin = function (e) {
+      if (!lb.classList.contains('is-zoomed')) return;
+      var r = lbImg.getBoundingClientRect();
+      var x = Math.min(100, Math.max(0, (e.clientX - r.left) / r.width * 100));
+      var y = Math.min(100, Math.max(0, (e.clientY - r.top) / r.height * 100));
+      lbImg.style.transformOrigin = x + '% ' + y + '%';
+    };
+    lbImg.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var on = !lb.classList.contains('is-zoomed');
+      setZoom(on); if (on) moveOrigin(e);
+    });
+    lbImg.addEventListener('pointermove', moveOrigin);
+
     $('[data-lb-prev]', lb).addEventListener('click', function () { showAt(lbIndex - 1); });
     $('[data-lb-next]', lb).addEventListener('click', function () { showAt(lbIndex + 1); });
     lb.addEventListener('keydown', function (e) {
@@ -323,7 +348,7 @@
     var tx = null;
     lb.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; }, { passive: true });
     lb.addEventListener('touchend', function (e) {
-      if (tx === null || lbList.length < 2) return;
+      if (tx === null || lbList.length < 2 || lb.classList.contains('is-zoomed')) { tx = null; return; }
       var dx = e.changedTouches[0].clientX - tx; tx = null;
       if (Math.abs(dx) > 50) showAt(lbIndex + (dx < 0 ? 1 : -1));
     }, { passive: true });
@@ -435,9 +460,32 @@
       var apartado = Math.round(QD.apartado * 100);
       var r = { privadaKey: pk, planKey: plk, privada: pr.nombre, plan: pl.nombre, tipo: pl.tipo, lista: lista, apartado: apartado };
       if (pl.tipo === 'contado') { r.precio = lista; r.saldo = lista - apartado; r.total = lista; return r; }
+      var hoy0 = new Date();
       if (pl.tipo === 'meses') {
         r.precio = lista; r.saldo = lista - apartado; r.meses = pl.meses;
-        r.mensual = Math.round(r.saldo / pl.meses); r.total = lista; return r;
+        r.mensual = Math.round(r.saldo / pl.meses); r.total = lista;
+        var sch = [], sal = r.saldo;
+        for (var m = 0; m < pl.meses; m++) {
+          var pg = m === pl.meses - 1 ? sal : r.mensual;
+          sch.push({ n: m + 1, fecha: addMonths(hoy0, m + 1, 1), ini: sal, pago: pg, capital: pg, interes: 0, fin: sal - pg });
+          sal -= pg;
+        }
+        r.schedule = sch; r.principal = r.saldo; r.intereses = 0;
+        r.primera = sch[0].fecha; r.ultima = sch[sch.length - 1].fecha; r.ultimoPago = sch[sch.length - 1].pago;
+        return r;
+      }
+      if (pl.tipo === '9010') {
+        var eng = Math.round(lista * pl.enganchePct / 100 / 100) * 100;
+        var credito = lista - eng, compl = eng - apartado;
+        var d30 = new Date(hoy0.getFullYear(), hoy0.getMonth(), hoy0.getDate() + pl.diasCredito);
+        r.precio = lista; r.enganche = eng; r.complemento = compl; r.credito = credito; r.total = lista;
+        r.principal = eng; r.intereses = 0; r.enganchePct = pl.enganchePct; r.dias = pl.diasCredito;
+        r.schedule = [
+          { n: 1, label: 'Apartado', fecha: hoy0, ini: lista, pago: apartado, capital: apartado, interes: 0, fin: lista - apartado },
+          { n: 2, label: 'Complemento de enganche', fecha: d30, ini: lista - apartado, pago: compl, capital: compl, interes: 0, fin: credito },
+          { n: 3, label: 'Crédito bancario o Infonavit (' + (100 - pl.enganchePct) + '%)', fecha: d30, ini: credito, pago: credito, capital: credito, interes: 0, fin: 0 }
+        ];
+        return r;
       }
       // Crédito directo amortizado
       var desc = Math.round((pl.descuento || 0) * 100);
@@ -489,7 +537,9 @@
         'Lote tipo: ' + QD.lote.frente + ' x ' + QD.lote.fondo + ' m (' + QD.lote.m2 + ' m²)', 'Forma de pago: ' + r.plan,
         'Precio de lista: ' + fmt2(r.lista)];
       if (r.tipo === 'contado') L.push('Apartado: ' + fmt2(r.apartado), 'Saldo en una sola exhibición: ' + fmt2(r.saldo));
-      else if (r.tipo === 'meses') L.push('Apartado: ' + fmt2(r.apartado), r.meses + ' mensualidades de ' + fmt2(r.mensual));
+      else if (r.tipo === 'meses') L.push('Apartado: ' + fmt2(r.apartado), r.meses + ' mensualidades sin intereses de ' + fmt2(r.mensual), 'Primera mensualidad: ' + dShort(r.primera));
+      else if (r.tipo === '9010') L.push('Enganche ' + r.enganchePct + '%: ' + fmt2(r.enganche) + ' (apartado ' + fmt0(r.apartado) + ' + complemento ' + fmt2(r.complemento) + ')',
+        'Crédito bancario o Infonavit (' + (100 - r.enganchePct) + '%): ' + fmt2(r.credito) + ' a ' + r.dias + ' días');
       else {
         if (r.descuento) L.push('Descuento: ' + fmt2(r.descuento), 'Precio del terreno: ' + fmt2(r.precio));
         L.push('Enganche (incluye apartado de ' + fmt0(r.apartado) + '): ' + fmt2(r.enganche),
@@ -508,13 +558,32 @@
       var body = $('[data-q-a-body]', amort);
       var html = '';
       r.schedule.forEach(function (x) {
-        html += '<tr><td>' + x.n + '</td><td>' + dShort(x.fecha) + '</td><td>' + fmt2(x.ini) + '</td><td>' + fmt2(x.pago) + '</td><td>' + fmt2(x.capital) + '</td><td>' + fmt2(x.interes) + '</td><td>' + fmt2(x.fin) + '</td></tr>';
+        html += '<tr><td>' + (x.label || x.n) + '</td><td>' + dShort(x.fecha) + '</td><td>' + fmt2(x.ini) + '</td><td>' + fmt2(x.pago) + '</td><td>' + fmt2(x.capital) + '</td><td>' + fmt2(x.interes) + '</td><td>' + fmt2(x.fin) + '</td></tr>';
       });
       body.innerHTML = html;
       $('[data-q-a-principal]', amort).textContent = fmt2(r.principal);
       $('[data-q-a-interest]', amort).textContent = fmt2(r.intereses);
       $('[data-q-a-total]', amort).textContent = fmt2(r.total);
-      $('[data-q-a-info]', amort).textContent = r.privada + ' · ' + r.meses + ' mensualidades de ' + fmt2(r.mensual) + ' · tasa mensual ' + (r.tasaAnual / 12).toLocaleString('es-MX') + '% · del ' + dShort(r.primera) + ' al ' + dShort(r.ultima);
+      var A = function (s) { return $(s, amort); };
+      if (r.tipo === 'amortizado') {
+        A('[data-q-a-title]').textContent = 'Ver tabla de amortización';
+        A('[data-q-a-sub]').textContent = 'Capital, intereses y saldo de cada uno de los ' + r.meses + ' pagos';
+        A('[data-q-a-l1]').textContent = 'Saldo financiado'; A('[data-q-a-l2]').textContent = 'Intereses del crédito'; A('[data-q-a-l3]').textContent = 'Total con financiamiento y apertura';
+        A('[data-q-a-info]').textContent = r.privada + ' · ' + r.meses + ' mensualidades de ' + fmt2(r.mensual) + ' · tasa mensual ' + (r.tasaAnual / 12).toLocaleString('es-MX') + '% · del ' + dShort(r.primera) + ' al ' + dShort(r.ultima);
+        A('[data-q-a-note]').textContent = 'El cálculo redondea a centavos en cada periodo y la última mensualidad se ajusta para liquidar el saldo. El total incluye el precio del terreno, los intereses y una sola apertura de crédito.';
+      } else if (r.tipo === 'meses') {
+        A('[data-q-a-title]').textContent = 'Ver tabla de pagos';
+        A('[data-q-a-sub]').textContent = 'Fecha, monto y saldo de cada una de las ' + r.meses + ' mensualidades';
+        A('[data-q-a-l1]').textContent = 'Saldo a diferir'; A('[data-q-a-l2]').textContent = 'Intereses (sin intereses)'; A('[data-q-a-l3]').textContent = 'Total del terreno';
+        A('[data-q-a-info]').textContent = r.privada + ' · ' + r.meses + ' mensualidades sin intereses de ' + fmt2(r.mensual) + ' · del ' + dShort(r.primera) + ' al ' + dShort(r.ultima);
+        A('[data-q-a-note]').textContent = 'Plan sin intereses: el saldo después del apartado se divide entre el número de meses elegido. La última mensualidad ajusta los centavos. Fechas estimadas a partir de hoy.';
+      } else {
+        A('[data-q-a-title]').textContent = 'Ver calendario de pagos';
+        A('[data-q-a-sub]').textContent = 'Apartado, complemento de enganche y crédito';
+        A('[data-q-a-l1]').textContent = 'Enganche (' + r.enganchePct + '%)'; A('[data-q-a-l2]').textContent = 'Intereses (sin intereses del desarrollo)'; A('[data-q-a-l3]').textContent = 'Total del terreno';
+        A('[data-q-a-info]').textContent = r.privada + ' · Plan ' + (100 - r.enganchePct) + '-' + r.enganchePct + ' · crédito a ' + r.dias + ' días';
+        A('[data-q-a-note]').textContent = 'El ' + (100 - r.enganchePct) + '% se cubre con crédito bancario o Infonavit, sujeto a la aprobación de la institución. Fechas estimadas a partir de hoy.';
+      }
     };
 
     var setError = function (msg) {
@@ -528,19 +597,25 @@
       var pk = ($('input[name="q-privada"]:checked', quote) || {}).value || 'marquesa';
       var allowed = QD.privadas[pk].planes;
       // Formas de pago disponibles para la privada
-      $$('input[name="q-plan"]', quote).forEach(function (inp) {
-        var ok = allowed.indexOf(inp.value) > -1;
-        inp.closest('.q-opt').hidden = !ok;
-        if (!ok && inp.checked) inp.checked = false;
-      });
-      var checked = $('input[name="q-plan"]:checked', quote);
-      if (!checked) { checked = $('input[name="q-plan"][value="' + allowed[0] + '"]', quote); checked.checked = true; }
-      var plk = checked.value, pl = QD.planes[plk];
+      var plansBox = qs('[data-q-plans]');
+      if (plansBox.getAttribute('data-for') !== pk) {
+        var prev = ($('input[name="q-plan"]:checked', quote) || {}).value;
+        var sel = allowed.indexOf(prev) > -1 ? prev : allowed[0];
+        plansBox.setAttribute('data-for', pk);
+        plansBox.classList.toggle('is-single', allowed.length === 1);
+        plansBox.innerHTML = allowed.map(function (k) {
+          var d = QD.planes[k];
+          return '<label class="q-opt"><input type="radio" name="q-plan" value="' + k + '"' + (k === sel ? ' checked' : '') + '>' +
+            '<span class="q-card q-card--plan"><b>' + d.nombre + '</b><small>' + d.desc + '</small></span></label>';
+        }).join('');
+      }
+      var plk = $('input[name="q-plan"]:checked', quote).value, pl = QD.planes[plk];
       var isCredit = pl.tipo === 'amortizado';
+      var hasTable = pl.tipo !== 'contado';
       qs('[data-credit-fields]').hidden = !isCredit;
       qs('[data-lot-step]').textContent = isCredit ? '4' : '3';
-      amort.hidden = !isCredit;
-      qs('[data-q-amort-link]').hidden = !isCredit;
+      amort.hidden = !hasTable;
+      qs('[data-q-amort-link]').hidden = !hasTable;
 
       var key = pk + '|' + plk;
       if (isCredit) {
@@ -584,6 +659,31 @@
         br.textContent = 'Apartado de ' + fmt0(r.apartado) + ' y después ' + (r.nPuente - 1) + ' pagos de ' + fmt2(r.pagoPuente) + ' y uno de ' + fmt2(r.ultimoPuente) + ' para completar enganche y apertura, a partir de ' + MESES[r.inicioPuente.getMonth()] + ' de ' + r.inicioPuente.getFullYear() + '.';
         qs('[data-q-note]').textContent = 'Simulación con precio de lista al ' + QD.fechaLista + ', sin descuentos ni promociones. No reserva el lote ni aprueba el crédito; un asesor confirmará disponibilidad, fechas y condiciones finales.';
         renderTable(r);
+      } else if (r.tipo === 'meses') {
+        qs('[data-q-bridge]').hidden = true;
+        qs('[data-q-hero-label]').textContent = 'Tu mensualidad';
+        hero.innerHTML = fmt2(r.mensual).replace(/(\.\d\d)$/, '<small>$1</small>');
+        qs('[data-q-hero-sub]').textContent = r.meses + ' mensualidades sin intereses · MXN';
+        lines += line('Precio de lista', fmt2(r.lista));
+        lines += line('Apartado', fmt2(r.apartado));
+        lines += line('Saldo a diferir', fmt2(r.saldo), 'is-strong');
+        lines += line('Primera mensualidad', dLong(r.primera));
+        lines += line('Última mensualidad', dLong(r.ultima));
+        lines += line('Total', fmt2(r.total), 'quote-total');
+        qs('[data-q-note]').textContent = 'Precio de lista al ' + QD.fechaLista + ', sin descuentos ni promociones. Plan sin intereses; fechas estimadas a partir de hoy. Un asesor te confirmará disponibilidad y condiciones finales.';
+        renderTable(r);
+      } else if (r.tipo === '9010') {
+        qs('[data-q-bridge]').hidden = true;
+        qs('[data-q-hero-label]').textContent = 'Tu enganche (' + r.enganchePct + '%)';
+        hero.textContent = fmt0(r.enganche);
+        qs('[data-q-hero-sub]').textContent = 'El ' + (100 - r.enganchePct) + '% restante con crédito bancario o Infonavit';
+        lines += line('Precio de lista', fmt2(r.lista));
+        lines += line('Apartado', fmt2(r.apartado));
+        lines += line('Complemento de enganche <small>a ' + r.dias + ' días</small>', fmt2(r.complemento));
+        lines += line('Crédito bancario o Infonavit <small>' + (100 - r.enganchePct) + '% a ' + r.dias + ' días</small>', fmt2(r.credito), 'is-strong');
+        lines += line('Total', fmt2(r.total), 'quote-total');
+        qs('[data-q-note]').textContent = 'Precio de lista al ' + QD.fechaLista + ', sin descuentos ni promociones. El crédito está sujeto a la aprobación del banco o de Infonavit. Un asesor te acompaña en el trámite.';
+        renderTable(r);
       } else {
         qs('[data-q-bridge]').hidden = true;
         qs('[data-q-hero-label]').textContent = 'Precio de lista';
@@ -591,7 +691,6 @@
         qs('[data-q-hero-sub]').textContent = fmt0(r.precio / QD.lote.m2) + ' por m² · lote de ' + QD.lote.m2 + ' m²';
         lines += line('Apartado', fmt0(r.apartado));
         if (r.tipo === 'contado') lines += line('Saldo en una sola exhibición', fmt0(r.saldo));
-        else lines += line(r.meses + ' mensualidades de', fmt0(r.mensual), 'quote-monthly');
         lines += line('Total', fmt0(r.total), 'quote-total');
         qs('[data-q-note]').textContent = 'Precios de lista al ' + QD.fechaLista + ', sin descuentos ni promociones. Sujetos a cambio y disponibilidad. Un asesor te confirmará el precio final y los descuentos vigentes.';
       }
@@ -633,14 +732,15 @@
       btn.addEventListener('click', function () {
         var r = current; if (!r || !r.schedule) return;
         var n = function (c) { return (c / 100).toFixed(2); };
-        var rows = [
-          ['Cotización Los Senderos Residencial'], ['Privada', r.privada], ['Lote tipo', QD.lote.frente + ' x ' + QD.lote.fondo + ' m (' + QD.lote.m2 + ' m2)'],
-          ['Precio de lista', n(r.lista)], ['Enganche (incluye apartado)', n(r.enganche)], ['Apertura de credito', n(r.apertura)],
-          ['Saldo a financiar', n(r.principal)], ['Tasa anual %', r.tasaAnual], ['Mensualidad', n(r.mensual)], ['Intereses', n(r.intereses)],
-          ['Total con intereses y apertura', n(r.total)], [],
-          ['Pago', 'Fecha', 'Saldo inicial', 'Mensualidad', 'Capital', 'Interes', 'Saldo final']
-        ].concat(r.schedule.map(function (x) { return [x.n, dShort(x.fecha), n(x.ini), n(x.pago), n(x.capital), n(x.interes), n(x.fin)]; }));
-        download(new Blob(['﻿' + rows.map(function (row) { return row.join(','); }).join('\r\n')], { type: 'text/csv;charset=utf-8' }), 'Amortizacion_' + slug(r) + '.csv');
+        var rows = [['Cotización Los Senderos Residencial'], ['Privada', r.privada], ['Forma de pago', r.plan],
+          ['Lote tipo', QD.lote.frente + ' x ' + QD.lote.fondo + ' m (' + QD.lote.m2 + ' m2)'], ['Precio de lista', n(r.lista)], ['Apartado', n(r.apartado)]];
+        if (r.tipo === 'amortizado') rows.push(['Enganche (incluye apartado)', n(r.enganche)], ['Apertura de credito', n(r.apertura)],
+          ['Saldo a financiar', n(r.principal)], ['Tasa anual %', r.tasaAnual], ['Mensualidad', n(r.mensual)], ['Intereses', n(r.intereses)], ['Total con intereses y apertura', n(r.total)]);
+        else if (r.tipo === 'meses') rows.push(['Saldo a diferir', n(r.saldo)], ['Mensualidades sin intereses', r.meses], ['Mensualidad', n(r.mensual)], ['Total', n(r.total)]);
+        else rows.push(['Enganche ' + r.enganchePct + '%', n(r.enganche)], ['Credito bancario o Infonavit', n(r.credito)], ['Total', n(r.total)]);
+        rows.push([], ['Pago', 'Fecha', 'Saldo inicial', 'Monto', 'Capital', 'Interes', 'Saldo final']);
+        rows = rows.concat(r.schedule.map(function (x) { return ['"' + (x.label || x.n) + '"', dShort(x.fecha), n(x.ini), n(x.pago), n(x.capital), n(x.interes), n(x.fin)]; }));
+        download(new Blob(['﻿' + rows.map(function (row) { return row.join(','); }).join('\r\n')], { type: 'text/csv;charset=utf-8' }), 'Tabla_de_pagos_' + slug(r) + '_' + r.plan.replace(/\s+/g, '_').normalize('NFD').replace(/[\u0300-\u036f]/g, '') + '.csv');
         track('cotizador_csv');
       });
     });
@@ -674,13 +774,20 @@
       var y = 52;
       doc.setFillColor(60, 99, 40); doc.roundedRect(M, y, W - 2 * M, 30, 3, 3, 'F');
       doc.setTextColor(221, 217, 163); doc.setFontSize(9);
-      doc.text(r.tipo === 'amortizado' ? 'Mensualidad estimada - ' + r.meses + ' pagos - tasa anual ' + r.tasaAnual + '%' : 'Precio de lista', M + 8, y + 10);
+      var heroLbl = r.tipo === 'amortizado' ? 'Mensualidad estimada - ' + r.meses + ' pagos - tasa anual ' + r.tasaAnual + '%'
+        : r.tipo === 'meses' ? 'Mensualidad - ' + r.meses + ' pagos sin intereses'
+        : r.tipo === '9010' ? 'Enganche ' + r.enganchePct + '%' : 'Precio de lista';
+      var heroVal = r.tipo === 'amortizado' || r.tipo === 'meses' ? r.mensual : r.tipo === '9010' ? r.enganche : r.precio;
+      doc.text(pdfText(heroLbl), M + 8, y + 10);
       doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(24);
-      doc.text((r.tipo === 'amortizado' ? fmt2(r.mensual) : fmt2(r.precio)) + ' MXN', M + 8, y + 23);
+      doc.text(fmt2(heroVal) + ' MXN', M + 8, y + 23);
       y += 42;
       var rows = [['Lote tipo', QD.lote.frente + ' x ' + QD.lote.fondo + ' m (' + QD.lote.m2 + ' m2)'], ['Precio de lista', fmt2(r.lista)]];
       if (r.tipo === 'contado') rows.push(['Apartado', fmt2(r.apartado)], ['Saldo en una sola exhibicion', fmt2(r.saldo)], ['Total', fmt2(r.total)]);
-      else if (r.tipo === 'meses') rows.push(['Apartado', fmt2(r.apartado)], [r.meses + ' mensualidades de', fmt2(r.mensual)], ['Total', fmt2(r.total)]);
+      else if (r.tipo === 'meses') rows.push(['Apartado', fmt2(r.apartado)], ['Saldo a diferir', fmt2(r.saldo)], [r.meses + ' mensualidades sin intereses de', fmt2(r.mensual)],
+        ['Primera mensualidad', dShort(r.primera)], ['Ultima mensualidad', dShort(r.ultima) + ' - ' + fmt2(r.ultimoPago)], ['Total', fmt2(r.total)]);
+      else if (r.tipo === '9010') rows.push(['Apartado', fmt2(r.apartado)], ['Complemento de enganche (' + r.dias + ' dias)', fmt2(r.complemento)],
+        ['Enganche ' + r.enganchePct + '%', fmt2(r.enganche)], ['Credito bancario o Infonavit ' + (100 - r.enganchePct) + '%', fmt2(r.credito)], ['Total', fmt2(r.total)]);
       else {
         if (r.descuento) rows.push(['Descuento', '-' + fmt2(r.descuento)], ['Precio del terreno', fmt2(r.precio)]);
         rows.push(['Enganche (incluye apartado de ' + fmt0(r.apartado) + ')', fmt2(r.enganche)], ['Apertura de credito (pago unico)', fmt2(r.apertura)],
@@ -695,26 +802,29 @@
         doc.setDrawColor(230, 226, 210); doc.line(M, y + 3, W - M, y + 3); y += 8.5;
       });
       y += 4; doc.setFontSize(8); doc.setTextColor(110, 110, 100);
-      var note = r.tipo === 'amortizado'
+      var note = r.tipo === '9010' ? 'El ' + (100 - r.enganchePct) + '% se cubre con credito bancario o Infonavit, sujeto a aprobacion de la institucion. Precio de lista al ' + QD.fechaLista + ', sin descuentos ni promociones. Un asesor confirmara disponibilidad y condiciones finales.'
+        : r.tipo === 'meses' ? 'Plan sin intereses. Precio de lista al ' + QD.fechaLista + ', sin descuentos ni promociones. Fechas estimadas a partir de hoy. Un asesor confirmara disponibilidad y condiciones finales.'
+        : r.tipo === 'amortizado'
         ? 'Credito directo sin revision de buro y sin aval. Simulacion con precio de lista al ' + QD.fechaLista + ', sin descuentos ni promociones. Las fechas son estimadas a partir de hoy. No reserva el lote ni aprueba el credito; un asesor confirmara disponibilidad, fechas y condiciones finales.'
         : 'Precios de lista al ' + QD.fechaLista + ', sin descuentos ni promociones. Sujetos a cambio y disponibilidad. Un asesor confirmara el precio final y los descuentos vigentes.';
       doc.text(doc.splitTextToSize(note, W - 2 * M), M, y);
 
       if (r.schedule) {
-        var per = 36, xs = [M + 2, M + 16, 78, 106, 134, 160, W - M - 2];
+        var per = 36, xs = r.tipo === '9010' ? [M + 2, M + 58, 102, 126, 148, 168, W - M - 2] : [M + 2, M + 16, 78, 106, 134, 160, W - M - 2];
         for (var s = 0; s < r.schedule.length; s += per) {
-          doc.addPage(); page++; header('Tabla de amortizacion - ' + r.privada);
+          doc.addPage(); page++; header((r.tipo === 'amortizado' ? 'Tabla de amortizacion - ' : 'Tabla de pagos - ') + r.privada);
           doc.setFontSize(8); doc.setTextColor(90, 90, 80);
-          doc.text(pdfText('Saldo financiado ' + fmt2(r.principal) + '  |  Mensualidad ' + fmt2(r.mensual) + '  |  Tasa mensual ' + (r.tasaAnual / 12) + '%  |  Importes en MXN'), M, 51);
+          doc.text(pdfText(r.tipo === 'amortizado' ? 'Saldo financiado ' + fmt2(r.principal) + '  |  Mensualidad ' + fmt2(r.mensual) + '  |  Tasa mensual ' + (r.tasaAnual / 12) + '%  |  Importes en MXN'
+            : r.plan + '  |  Sin intereses  |  Importes en MXN'), M, 51);
           doc.setFillColor(239, 233, 214); doc.rect(M, 55, W - 2 * M, 8, 'F');
           doc.setFont('helvetica', 'bold'); doc.setTextColor(31, 54, 20);
-          ['Pago', 'Fecha', 'Saldo inicial', 'Mensualidad', 'Capital', 'Interes', 'Saldo final'].forEach(function (h, i) { doc.text(h, xs[i], 60.5, { align: i > 1 ? 'right' : 'left' }); });
+          ['Pago', 'Fecha', 'Saldo inicial', r.tipo === '9010' ? 'Monto' : 'Mensualidad', 'Capital', 'Interes', 'Saldo final'].forEach(function (h, i) { doc.text(h, xs[i], 60.5, { align: i > 1 ? 'right' : 'left' }); });
           doc.setFont('helvetica', 'normal');
           var ry = 68;
           r.schedule.slice(s, s + per).forEach(function (x) {
             if (x.n % 2 === 0) { doc.setFillColor(247, 244, 234); doc.rect(M, ry - 4.2, W - 2 * M, 5.8, 'F'); }
             doc.setTextColor(60, 66, 55);
-            [String(x.n), dShort(x.fecha), fmt2(x.ini), fmt2(x.pago), fmt2(x.capital), fmt2(x.interes), fmt2(x.fin)].forEach(function (v, i) { doc.text(v, xs[i], ry, { align: i > 1 ? 'right' : 'left' }); });
+            [pdfText(x.label ? (x.n + '. ' + x.label.replace(/ \(.*\)/, '')) : String(x.n)), dShort(x.fecha), fmt2(x.ini), fmt2(x.pago), fmt2(x.capital), fmt2(x.interes), fmt2(x.fin)].forEach(function (v, i) { doc.text(v, xs[i], ry, { align: i > 1 ? 'right' : 'left' }); });
             ry += 5.6;
           });
         }
@@ -737,36 +847,56 @@
     render();
   }
 
-  /* ---------- Masterplan interactivo ---------- */
+  /* ---------- Masterplan interactivo (galería por punto) ---------- */
   $$('[data-masterplan]').forEach(function (mp) {
     var pins = $$('[data-pin]', mp);
     var cImg = $('[data-pin-img]', mp), cTitle = $('[data-pin-title]', mp), cText = $('[data-pin-text]', mp);
-    var auto = null, idx = -1;
+    var cThumbs = $('[data-pin-thumbs]', mp), cCount = $('[data-pin-count]', mp), cMain = $('[data-pin-main]', mp);
+    var auto = null, idx = -1, imgs = [], cur = 0;
+    var showImg = function (k) {
+      cur = k;
+      cImg.classList.add('is-loading');
+      cImg.onload = function () { cImg.classList.remove('is-loading'); };
+      cImg.src = imgs[k].src; cImg.alt = imgs[k].alt;
+      cCount.textContent = (k + 1) + ' / ' + imgs.length;
+      $$('button', cThumbs).forEach(function (b, i) { b.setAttribute('aria-current', String(i === k)); });
+    };
     var select = function (i, fromUser) {
       idx = i;
       var pin = pins[i];
       pins.forEach(function (p) { p.setAttribute('aria-expanded', String(p === pin)); });
-      cImg.classList.add('is-loading');
-      cImg.onload = function () { cImg.classList.remove('is-loading'); };
-      cImg.src = pin.getAttribute('data-img');
-      cImg.alt = pin.getAttribute('data-alt');
+      try { imgs = JSON.parse(pin.getAttribute('data-imgs')); } catch (e) { imgs = []; }
       cTitle.textContent = pin.getAttribute('data-title');
       cText.textContent = pin.getAttribute('data-text');
-      if (fromUser) {
-        if (auto) { clearInterval(auto); auto = null; }
-        track('masterplan_punto', { punto: pin.getAttribute('data-title') });
-      }
+      cThumbs.innerHTML = imgs.map(function (im, k) {
+        return '<button type="button" aria-label="Ver foto ' + (k + 1) + '"><img src="' + im.src + '" alt="" loading="lazy"></button>';
+      }).join('');
+      $$('button', cThumbs).forEach(function (b, k) {
+        b.addEventListener('click', function () { stopAuto(); showImg(k); });
+      });
+      showImg(0);
+      if (fromUser) { stopAuto(); track('masterplan_punto', { punto: pin.getAttribute('data-title') }); }
     };
+    var stopAuto = function () { if (auto) { clearInterval(auto); auto = null; } };
     pins.forEach(function (pin, i) { pin.addEventListener('click', function () { select(i, true); }); });
-    // Recorre los puntos solo mientras el mapa está a la vista, hasta que el visitante toque uno
+    cMain.addEventListener('click', function () {
+      stopAuto();
+      if (!window.__openLightbox || !imgs.length) return;
+      var title = cTitle.textContent;
+      window.__openLightbox(imgs.map(function (im) { return { src: im.src, alt: im.alt, caption: title + ' · ' + im.alt }; }), cur);
+    });
+    select(0, false);
+    // Recorre los puntos mientras el mapa está a la vista, hasta que el visitante toque algo
     if ('IntersectionObserver' in window && !reduceMotion) {
+      var touched = false;
+      mp.addEventListener('pointerdown', function () { touched = true; stopAuto(); }, { passive: true });
       new IntersectionObserver(function (en) {
-        if (en[0].isIntersecting) {
-          if (idx === -1) select(0, false);
-          if (!auto && idx !== -2) auto = setInterval(function () { select((idx + 1) % pins.length, false); }, 4500);
-        } else if (auto) { clearInterval(auto); auto = null; }
+        if (en[0].isIntersecting && !touched) {
+          if (!auto) auto = setInterval(function () {
+            if (cur < imgs.length - 1) showImg(cur + 1); else select((idx + 1) % pins.length, false);
+          }, 3200);
+        } else stopAuto();
       }, { threshold: 0.4 }).observe(mp);
-      mp.addEventListener('pointerdown', function () { if (auto) { clearInterval(auto); auto = null; } idx = idx < 0 ? 0 : idx; }, { passive: true });
     }
   });
 

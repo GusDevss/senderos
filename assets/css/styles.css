@@ -1222,3 +1222,51 @@ body.dialog-open { overflow: hidden; }
   .quote-actions-row { grid-template-columns: 1fr; }
   .quote-form, .quote-result { padding: 20px 16px; }
 }
+
+/* =====================================================================
+   v8 — Palabra del logo sobre el video, masterplan con galería, zoom
+   ===================================================================== */
+/* La palabra "senderos" (trazada del logo original) es una ventana al video */
+.hc-mask {
+  background: rgb(19 35 11 / .9); mix-blend-mode: normal;
+  -webkit-mask: linear-gradient(#000 0 0), url("../img/senderos-palabra.svg") center / min(80%, 1100px) auto no-repeat;
+  -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) exclude, url("../img/senderos-palabra.svg") center / min(80%, 1100px) auto no-repeat;
+}
+@media (max-width: 767px) {
+  .hc-word { height: clamp(110px, 32vw, 170px); }
+  .hc-mask {
+    -webkit-mask-size: auto, 88% auto;
+            mask-size: auto, 88% auto;
+  }
+}
+
+/* Formas de pago generadas según la privada */
+.quote-options--plans { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.quote-options--plans.is-single { grid-template-columns: 1fr; }
+
+/* Masterplan: galería por punto */
+.pin-main { position: relative; display: block; width: 100%; padding: 0; border: 0; background: var(--green-800); cursor: zoom-in; }
+.pin-main img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+.pin-count {
+  position: absolute; right: 10px; bottom: 10px; font-size: .72rem; font-weight: 600; color: #fff;
+  background: rgb(15 28 8 / .65); padding: .3em .7em; border-radius: 999px; backdrop-filter: blur(4px);
+}
+.pin-thumbs { display: flex; gap: 6px; padding: 8px 12px 0; overflow-x: auto; scrollbar-width: none; }
+.pin-thumbs::-webkit-scrollbar { display: none; }
+.pin-thumbs button { flex: 0 0 auto; width: 58px; height: 42px; padding: 0; border: 2px solid transparent; border-radius: 8px; overflow: hidden; background: var(--cream-200); opacity: .7; transition: opacity .2s, border-color .2s; }
+.pin-thumbs button[aria-current="true"] { border-color: var(--green-700); opacity: 1; }
+.pin-thumbs button:hover { opacity: 1; }
+.pin-thumbs img { width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 960px) {
+  .pin-card { display: block; }
+  .pin-main img { aspect-ratio: 16 / 9; height: auto; }
+}
+
+/* Visor: zoom para leer los planos */
+.lightbox img { cursor: zoom-in; transition: transform .25s ease, opacity .25s; touch-action: manipulation; }
+.lightbox.is-zoomed img { transform: scale(2.6); cursor: zoom-out; }
+.lightbox.is-zoomed .lb-nav, .lightbox.is-zoomed .lb-figure figcaption { opacity: 0; pointer-events: none; }
+.lightbox .lb-figure { overflow: hidden; max-width: 100vw; }
+.lb-zoom-hint { display: block; font-size: .75rem; color: rgb(255 255 255 / .6); margin-top: 4px; }
+.lightbox.is-single .lb-zoom-hint { display: block; }
